@@ -1,2 +1,29 @@
-<h1>{{title}}</h1>
-<p>Welcome to {{title}}</p>
+<div class="row">
+  <div class="col-sm-1 col-lg-2">
+    {{> categories}}
+  </div>
+  <div class="container col-sm-1 col-lg-10">
+    {{#if hasErrors}}
+    <div class="row">
+      <div class="alert alert-danger" role="alert">
+        {{#each messages}} {{this}} {{/each}}
+      </div>
+    </div>
+    {{/if}}
+    <div class="row">
+      {{#each products}}
+      <div class="card col-sm-1 col-lg-4">
+        <img class="card-img-top" src="{{this.imagePath}}" alt="Card image cap">
+        <div class="card-body">
+          <h4 class="card-title">{{this.title}}</h4>
+          <p class="card-text">{{this.description}}</p>
+          <div class="clearfix">
+            <p class="float-left">{{this.price}}</p>
+            <a href="/add-to-cart/{{this._id}}" class="btn btn-success float-right">Добавить в корзину</a>
+          </div>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+  </div>
+</div>

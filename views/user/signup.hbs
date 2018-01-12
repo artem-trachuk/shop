@@ -1,0 +1,22 @@
+<div class="row">
+    <div class="col-md-4 offset-md-4">
+        <h1>Регистрация</h1>
+        {{#if hasErrors}}
+        <div class="alert alert-danger" role="alert">
+            {{#each messages}} {{this}} {{/each}}
+        </div>
+        {{/if}}
+        <form action="/user/signup" method="post">
+            <div class="form-group">
+                <label for="username">Логин</label>
+                <input class="form-control" type="text" id="username" name="username">
+            </div>
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input class="form-control" type="password" id="password" name="password">
+            </div>
+            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+            <button class="btn btn-primary" type="submit">Зарегистрироваться</button>
+        </form>
+    </div>
+</div>
