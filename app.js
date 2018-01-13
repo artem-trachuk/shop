@@ -40,6 +40,13 @@ app.set('view engine', 'hbs');
 
 // register hbs partials
 hbs.registerPartials(__dirname + '/views/partials');
+hbs.registerPartials(__dirname + '/views/partials/admin');
+
+// register hbs helper to calculate a price
+hbs.registerHelper('getUAHprice', function (usdprice, rate) {
+  console.log(usdprice + ' ' + rate);
+  return usdprice * rate;
+});
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -92,6 +99,22 @@ app.use(function (err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
   res.render('error');
+});
+
+// initiate config if not exist
+Config = require('./models/config');
+Config.findOne(function (err, doc) {
+  if (err) {
+    console.log('err ' + err);
+  }
+  if (doc === null) {
+    conf = new Config();
+    conf.save(function (err, res) {
+      if (err) {
+        return console.log(err);
+      }
+    })
+  }
 });
 
 module.exports = app;

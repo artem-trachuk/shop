@@ -1,0 +1,12 @@
+<div class="row">
+    <div class="col-sm-2">
+{{> adminNavigation}}
+    </div>
+    <div class="col-sm-10">
+{{#each products}}
+    <h6><a href="/admin/product/{{this._id}}"><i class="fas fa-edit"></i></a> {{this.title}} <span class="text-muted">{{this.price}}</span></h6>
+{{/each}}
+    </div>
+</div>
+
+Товары

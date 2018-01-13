@@ -1,0 +1,32 @@
+<div class="row">
+    <div class="col-md-4 offset-md-4">
+        <h1>{{product.title}}</h1>
+        {{#if hasErrors}}
+        <div class="alert alert-danger" role="alert">
+            {{#each messages}} {{this}} {{/each}}
+        </div>
+        {{/if}}
+        <form action="/admin/product/{{product._id}}" method="post">
+            <div class="form-group">
+                <label for="title">Название продукта</label>
+                <input class="form-control" type="text" id="title" name="title" value="{{product.title}}">
+            </div>
+            <div class="form-group">
+                <label for="USDprice">Стоимость (USD, Доллар США)</label>
+                <input class="form-control" type="text" id="USDprice" name="USDprice" aria-describedby="USDHelpBlock" value="{{product.USDprice}}">
+                <small id="USDHelpBlock" class="form-text text-muted">
+                    Стоимость будет отображаться в гривнах по курсу, указанному в панели управления
+                </small>
+            </div>
+            <div class="form-group">
+                <label for="UAHprice">Стоимость (UAH, Украинская гривна)</label>
+                <input class="form-control" type="text" id="UAHprice" name="price" aria-describedby="UAHHelpBlock" value="{{product.price}}">
+                <small id="UAHHelpBlock" class="form-text text-muted">
+                    Если указана стоимость в долларах, поле не нужно заполнять
+                </small>
+            </div>
+            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+            <button class="btn btn-success" type="submit">Сохранить</button>
+        </form>
+    </div>
+</div>

@@ -6,18 +6,25 @@ router.use(csrf());
 
 var Product = require('../models/product');
 var Cart = require('../models/cart');
+var Config = require('../models/config');
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
   var messages = req.flash('success');
-  var products = Product.find(function (err, docs) {
-    res.render('index', {
-      title: 'Kalynovskyi & Co. магазин сетевого оборудования от специалистов, которые с ним работают',
-      products: docs,
-      messages: messages,
-      hasErrors: messages.length > 0
+  Config.findOne()
+  .then(one => {
+    var products = Product.find(function (err, docs) {
+      res.render('index', {
+        title: 'Kalynovskyi & Co. магазин сетевого оборудования от специалистов, которые с ним работают',
+        products: docs,
+        messages: messages,
+        hasErrors: messages.length > 0,
+        exchangeRate: one.USDtoUAH
+      });
     });
-  });
+  })
+  .catch(err => {});
+  
 });
 
 /* Add to cart. */
@@ -34,7 +41,6 @@ router.get('/add-to-cart/:id', function (req, res, next) {
     cart.add(product, product.id);
     // Save cart into session
     req.session.cart = cart;
-    console.log(req.session.cart);
     res.redirect('/');
   });
 });
@@ -67,6 +73,8 @@ router.get('/checkout', function (req, res, next) {
 
 /* POST Checkout. */
 router.post('/checkout', function (req, res, next) {
+  var checkout = req.body;
+  req.session.cart = null;
   req.flash('success', 'happy');
   res.redirect('/');
 });

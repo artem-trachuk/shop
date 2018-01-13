@@ -4,6 +4,7 @@ var productSchema = new mongoose.Schema({
     imagePath: String,
     title: String,
     price: Number,
+    USDprice: Number,
     description: String
 });
 

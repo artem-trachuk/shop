@@ -1,2 +1,15 @@
-<h1>admin</h1>
-{{> adminheader}}
+{{> adminHeader}}
+<div class="row">
+    <div class="col-md-3">{{> adminNavigation}}</div>
+    <div class="col-md-6">
+        <form action="/admin" method="POST">
+            <label for="exchangeRate">Стоимость одного доллара</label>
+            <input type="text" name="exchangeRate" id="exchangeRate" class="form-control" aria-describedby="exchangeRateHelpBlock" value="{{USDtoUAH}}">
+            <small id="exchangeRateHelpBlock" class="form-text text-muted">
+                Например, 8.20
+            </small>
+            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+            <button class="btn btn-success" type="submit">Сохранить</button>
+        </form>
+    </div>
+</div>

@@ -58,3 +58,4 @@ typings/
 .env
 
 shop-config.js
+package-lock.json
