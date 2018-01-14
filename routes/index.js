@@ -7,24 +7,25 @@ router.use(csrf());
 var Product = require('../models/product');
 var Cart = require('../models/cart');
 var Config = require('../models/config');
+var Order = require('../models/order');
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
   var messages = req.flash('success');
   Config.findOne()
-  .then(one => {
-    var products = Product.find(function (err, docs) {
-      res.render('index', {
-        title: 'Kalynovskyi & Co. магазин сетевого оборудования от специалистов, которые с ним работают',
-        products: docs,
-        messages: messages,
-        hasErrors: messages.length > 0,
-        exchangeRate: one.USDtoUAH
+    .then(one => {
+      var products = Product.find(function (err, docs) {
+        res.render('index', {
+          title: 'Kalynovskyi & Co. магазин сетевого оборудования от специалистов, которые с ним работают',
+          products: docs,
+          messages: messages,
+          hasErrors: messages.length > 0,
+          exchangeRate: one.USDtoUAH
+        });
       });
-    });
-  })
-  .catch(err => {});
-  
+    })
+    .catch(err => { });
+
 });
 
 /* Add to cart. */
@@ -73,10 +74,30 @@ router.get('/checkout', function (req, res, next) {
 
 /* POST Checkout. */
 router.post('/checkout', function (req, res, next) {
-  var checkout = req.body;
-  req.session.cart = null;
-  req.flash('success', 'happy');
-  res.redirect('/');
+  // Empty cart
+  if (!req.session.cart) {
+    return res.redirect('/cart');
+  }
+  var delivery = req.body;
+  var userCart = req.session.cart;
+  var order = new Order(
+    {
+      cart: userCart,
+      delivery: {
+        address: delivery.address,
+        name: delivery.name
+      },
+      user: req.user._id,
+      orderDate: new Date()
+    }
+  );
+  Order.create(order)
+    .then(o => {
+      req.session.cart = null;
+      req.flash('success', 'Заказ оформлен.');
+      res.redirect('/');
+    })
+    .catch(err => { });
 });
 
 module.exports = router;

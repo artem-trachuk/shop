@@ -6,6 +6,7 @@ router.use(csrf());
 
 var Config = require('../models/config');
 var Product = require('../models/product');
+var Order = require('../models/order');
 
 /* GET Admin page. */
 router.get('/', function (req, res, next) {
@@ -60,11 +61,11 @@ router.get('/product/:id', function (req, res, next) {
 });
 
 /* POST Admin product. */
-router.post('/product', function(req, res, next) {
+router.post('/product', function (req, res, next) {
   product = req.body;
   Product.create(product)
-  .then(insertRes => res.redirect('/admin/product/' + insertRes.id))
-  .catch(err => {});
+    .then(insertRes => res.redirect('/admin/product/' + insertRes.id))
+    .catch(err => { });
 });
 
 /* POST Admin product by id. */
@@ -80,6 +81,16 @@ router.post('/product/:id', function (req, res, next) {
         .then(res.redirect('/admin/product/' + productId));
     })
     .catch(err => res.redirect('/'));
+});
+
+/* GET Admin Orders page. */
+router.get('/orders', function (req, res, next) {
+  Order.find()
+  .then(orders => {
+    res.render('admin/orders', {
+      orders: orders
+    });
+  });
 });
 
 module.exports = router;

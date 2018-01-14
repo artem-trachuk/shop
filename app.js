@@ -19,11 +19,12 @@ var users = require('./routes/users');
 var admin = require('./routes/admin');
 var user = require('./routes/user');
 
-mongoose.connect(shopConfig.mongodburl);
+mongoose.connect(shopConfig.mongodburl)
+  .catch(err => console.log(err));
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () {
-  console.log(`we're connected!`);
+  console.log(`Connection to MongoDB was established.`);
 });
 
 var app = express();
@@ -44,7 +45,6 @@ hbs.registerPartials(__dirname + '/views/partials/admin');
 
 // register hbs helper to calculate a price
 hbs.registerHelper('getUAHprice', function (usdprice, rate) {
-  console.log(usdprice + ' ' + rate);
   return usdprice * rate;
 });
 

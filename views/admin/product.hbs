@@ -26,7 +26,10 @@
                 </small>
             </div>
             <input type="hidden" name="_csrf" value="{{ csrfToken }}">
-            <button class="btn btn-success" type="submit">Сохранить</button>
+            <div class="clearfix">
+                <button class="btn btn-success float-left" type="submit">Сохранить</button>
+                <a href="/admin/product/delete/{{product._id}}" class="btn btn-danger float-right">Удалить</a>
+            </div>
         </form>
     </div>
 </div>
