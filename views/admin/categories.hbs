@@ -6,29 +6,25 @@
     <div class="col-12 col-lg-6">
         <div class="row mb-2">
             <div class="col-12">
-                <a href="/admin/product" class="btn btn-primary float-right">Добавить продукт</a>
+                <a href="/admin/category" class="btn btn-primary float-right">Создать категорию</a>
             </div>
         </div>
         <div class="row">
             <div class="col-12">
-                <h3>Продукты</h3>
+                <h3>Категории</h3>
                 <table class="table">
                     <thead>
                         <tr>
                             <th scope="col">Название</th>
-                            <th scope="col">USD</th>
-                            <th scope="col">UAH</th>
                             <th scope="col"></th>
                         </tr>
                     </thead>
                     <tbody>
-                        {{#each products}}
+                        {{#each categories}}
                         <tr>
-                            <td>{{this.title}}</td>
-                            <td>{{this.USDprice}}</td>
-                            <td>{{this.price}}</td>
+                            <td>{{this.name}}</td>
                             <td>
-                                <a href="/admin/product/{{this._id}}" class="text-info">
+                                <a href="/admin/category/{{this._id}}" class="text-info">
                                     <i class="fas fa-edit"></i>
                                 </a>
                             </td>

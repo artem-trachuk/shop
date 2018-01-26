@@ -1,0 +1,34 @@
+{{> messages}} {{> search}}
+<div class="row">
+  <div class="col-12 col-lg-3">
+    {{> categories}}
+  </div>
+  <div class="col-md-6">
+    <div class="card">
+      {{!--
+      <img class="card-img-top" src="{{product.imagePath}}" alt="{{this.title}}"> --}}
+      <div class="card-body">
+        <h4 class="card-title">{{product.title}}</h4>
+        <p class="card-text">{{product.description}}</p>
+        <table class="table">
+          <tbody>
+            {{#each fields}}
+            <tr>
+              <td>{{this.name}}</td>
+              <td>{{this.value}}</td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+        <div class="clearfix">
+          {{#if product.USDprice}}
+          <p class="float-left">{{getUAHprice product.USDprice exchangeRate}}</p>
+          {{else}}
+          <p class="float-left">{{product.price}}</p>
+          {{/if}}
+          <a href="/add-to-cart/{{product._id}}" class="btn btn-success float-right">Добавить в корзину</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

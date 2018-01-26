@@ -1,0 +1,15 @@
+<div class="row">
+    <div class="col-12 offset-0 col-lg-6 offset-lg-3">
+        {{#if errors}}
+        <div class="alert alert-danger" role="alert">
+            {{#each errors}}
+            <p class="my-0">{{this}}</p> {{/each}}
+        </div>
+        {{/if}} {{#if success}}
+        <div class="alert alert-success" role="alert">
+            {{#each success}}
+            <p class="my-0">{{this}}</p> {{/each}}
+        </div>
+        {{/if}}
+    </div>
+</div>

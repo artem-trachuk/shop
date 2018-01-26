@@ -1,0 +1,40 @@
+<div class="row">
+    {{#each products}}
+    <div class="col-12 col-lg-4 px-lg-3 mb-lg-5 d-flex flex-column">
+        <div class="row" style="flex-grow: 1;">
+            <div class="col-7">
+                <div class="row">
+                    <div class="col">
+                        <a href="/product/{{this._id}}" class="text-white">
+                            <h6 class="text-center bg-success font-weight-bold border border-success rounded">{{this.title}}</h6>
+                        </a>
+                    </div>
+                    <div class="w-100"></div>
+                    <div class="col">
+                        <small>{{this.description}}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-5">
+                <img class="w-100" src="{{this.imagePath}}" alt="{{this.title}}">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-10 text-right">
+                {{#if this.USDprice}}
+                <h4>{{getUAHprice this.USDprice ../exchangeRate}} грн</h4>
+                {{else}}
+                <h4>{{this.price}} грн</h4>
+                {{/if}}
+            </div>
+            <div class="col-2">
+                <a href="/add-to-cart/{{this._id}}" class="text-success">
+                    <h4>
+                        <i class="fas fa-cart-arrow-down"></i>
+                    </h4>
+                </a>
+            </div>
+        </div>
+    </div>
+    {{/each}}
+</div>

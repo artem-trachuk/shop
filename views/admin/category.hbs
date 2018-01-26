@@ -1,0 +1,84 @@
+{{> messages}}
+<div class="row">
+    <div class="col-12 col-lg-6 offset-lg-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="/admin/">Панель управления</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="/admin/categories/">Категории</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">{{#if category}}{{category.name}}{{else}}Создать категорию{{/if}}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12 col-lg-6 offset-lg-3">
+        {{#if category}}
+        <div class="clearfix">
+            <h2 class="float-left">{{category.name}}</h2>
+            <!-- Button trigger modal -->
+            <button disabled type="button" class="btn btn-danger float-right" data-toggle="modal" data-target="#deleteModal">
+                Удалить
+            </button>
+
+            <!-- Modal -->
+            <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Удалить категорию
+                                <span class="text-danger">{{category.name}}</span>
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Удаление категории приведет к следующим последствиям:</p>
+                            <ul>
+                                <li>поля, которые используются только этой категорией, будут удалены вместе с содержимыми данными</li>
+                                <li>продукты, которые относятся только к этой категории, будут удалены</li>
+                            </ul>
+                        </div>
+                        <div class="modal-footer">
+                            <a href="/admin/delete/category/{{category._id}}" class="btn btn-danger float-right" data-toggle="tooltip" data-placement="bottom">Удалить</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{else}}
+        <h2>Создать категорию</h2>
+        {{/if}}
+        <form action="/admin/category/{{category._id}}" method="post">
+            <div class="form-group">
+                <label for="name">Название</label>
+                <input class="form-control" type="text" id="name" name="name" required value="{{category.name}}">
+            </div>
+            <div class="form-group">
+                <label for="name">Родительская категория</label>
+                <select class="form-control" id="parentCategory" name="parentCategory" {{#if category.parentCategoryId}}disabled{{/if}}>
+                    <option disabled selected>Выберите категорию</option>
+                    {{#each categories}}
+                    <option value={{this.id}} {{optionHelper ../selectedValue this.id}}>{{this.name}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+            <div class="clearfix">
+                <button class="btn btn-success float-left" type="submit">Сохранить</button>
+                {{#if category}}
+                <a href="/admin/category/{{category._id}}/fields" class="btn btn-info float-right">Настроить поля</a>
+                {{/if}}
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>

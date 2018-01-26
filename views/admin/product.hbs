@@ -1,34 +1,95 @@
+{{> messages}}
 <div class="row">
-    <div class="col-md-4 offset-md-4">
-        <h1>{{product.title}}</h1>
-        {{#if hasErrors}}
-        <div class="alert alert-danger" role="alert">
-            {{#each messages}} {{this}} {{/each}}
+    <div class="col-12 col-lg-6 offset-lg-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="/admin/">Панель управления</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="/admin/products/">Продукты</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">{{#if product}}{{product.title}}{{else}}Добавить продукт{{/if}}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12 col-lg-6 offset-lg-3">
+        <hr>
+        <div class="clearfix">
+            {{#if product}}
+            <div class="clearfix">
+                <h2 class="float-left">{{product.title}}</h2>
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-danger float-right" data-toggle="modal" data-target="#deleteModal">
+                    Удалить
+                </button>
+
+                <!-- Modal -->
+                <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Удалить продукт
+                                    <span class="text-danger">{{product.title}}</span>
+                                </h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Удаление продукта приведет к следующим последствиям:</p>
+                                <ul>
+                                    <li>продукт будет полностью удален без возможности восстановления</li>
+                                    <li>продукт не будет отображаться в уже совершенных заказах</li>
+                                </ul>
+                            </div>
+                            <div class="modal-footer">
+                                <a href="/admin/delete/product/{{product._id}}" class="btn btn-danger float-right" data-toggle="tooltip" data-placement="bottom">Удалить</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{else}}
+            <h2>Добавить продукт</h2>
+            {{/if}}
         </div>
-        {{/if}}
-        <form action="/admin/product/{{product._id}}" method="post">
+        <form action="/admin/product/{{product._id}}?_csrf={{csrfToken}}" method="post" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="title">Название продукта</label>
-                <input class="form-control" type="text" id="title" name="title" value="{{product.title}}">
+                <input class="form-control" type="text" id="title" name="title" value="{{product.title}}" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Описание продукта</label>
+                <textarea class="form-control" id="description" name="description" rows="3">{{product.description}}</textarea>
             </div>
             <div class="form-group">
                 <label for="USDprice">Стоимость (USD, Доллар США)</label>
-                <input class="form-control" type="text" id="USDprice" name="USDprice" aria-describedby="USDHelpBlock" value="{{product.USDprice}}">
+                <input class="form-control" type="number" step="0.01" id="USDprice" name="USDprice" aria-describedby="USDHelpBlock" value="{{product.USDprice}}">
                 <small id="USDHelpBlock" class="form-text text-muted">
                     Стоимость будет отображаться в гривнах по курсу, указанному в панели управления
                 </small>
             </div>
             <div class="form-group">
                 <label for="UAHprice">Стоимость (UAH, Украинская гривна)</label>
-                <input class="form-control" type="text" id="UAHprice" name="price" aria-describedby="UAHHelpBlock" value="{{product.price}}">
+                <input class="form-control" type="number" step="0.01" id="UAHprice" name="price" aria-describedby="UAHHelpBlock" value="{{product.price}}">
                 <small id="UAHHelpBlock" class="form-text text-muted">
-                    Если указана стоимость в долларах, поле не нужно заполнять
+                    Если указана стоимость в долларах, поле можно не заполнять
                 </small>
+            </div>
+            <div class="form-group">
+                <label for="productImage">Укажите изображение продукта</label>
+                <input type="file" accept="image/*" class="form-control-file" id="productImage" name="productImage">
+                <small class="form-text text-muted">Максимальный размер файла 1МБ</small>
             </div>
             <input type="hidden" name="_csrf" value="{{ csrfToken }}">
             <div class="clearfix">
                 <button class="btn btn-success float-left" type="submit">Сохранить</button>
-                <a href="/admin/product/delete/{{product._id}}" class="btn btn-danger float-right">Удалить</a>
+                {{#if product}}
+                <a href="/admin/product/{{product._id}}/data" class="btn btn-secondary float-right">Указать данные</a>
+                {{/if}}
             </div>
         </form>
     </div>

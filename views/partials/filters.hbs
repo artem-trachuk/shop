@@ -1,0 +1,21 @@
+<form action="/category/{{categoryId}}" class="mt-4" method="GET">
+    {{#each fields}}
+    <div class="row">
+        <div class="col-md-12">
+            <h6>
+                {{this.name}}
+            </h6>
+            {{#each this.data}}
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="{{this.fieldValue}}" id="{{this.fieldValue}}" name="{{this.fieldId}}">
+                <label class="form-check-label" for="{{this.fieldValue}}">
+                    {{this.fieldValue}}
+                </label>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+    <hr> {{/each}}
+    <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+    <button class="btn btn-light btn-sm float-right" type="submit">Применить</button>
+</form>

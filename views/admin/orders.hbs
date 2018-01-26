@@ -1,6 +1,11 @@
-<h2>orders</h2>
-{{#each orders}} status: {{this.status}}
-<hr> {{#each this.cart.items}} title: <a href="/admin/product/{{this.item._id}}">{{this.item.title}}</a> {{/each}}
-<hr> address: {{this.delivery.address}}
-<hr> date: {{this.orderDate}}
-{{/each}}
+<div class="row">
+    <div class="col-md-3">{{> adminNavigation}}</div>
+    <div class="col-md-6">
+        <h2>orders</h2>
+        {{#each orders}} status: {{this.status}}
+        <hr> {{#each this.cart.items}} title:
+        <a href="/admin/product/{{this.item._id}}">{{this.item.title}}</a> {{/each}}
+        <hr> address: {{this.delivery.address}}
+        <hr> date: {{this.orderDate}} {{/each}}
+    </div>
+</div>
