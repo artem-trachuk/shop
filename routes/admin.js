@@ -102,4 +102,8 @@ router.get('/categories', function (req, res, next) {
     .catch(err => console.log(err));
 });
 
+router.get('/shipping-and-payment', (req, res, next) => {
+  res.render('admin/shipping-and-payment');
+});
+
 module.exports = router;

@@ -23,6 +23,9 @@ module.exports = function buildCategories(req, res, next) {
     }
     Category.count()
         .then(count => {
+            if (count === 0) {
+                return next();
+            }
             Category.find({
                     parentCategoryId: {
                         $exists: false
