@@ -1,8 +1,9 @@
 var express = require('express');
 var router = express.Router();
 var multer = require('multer');
+var conf = require('../../shop-config');
 var upload = multer({
-    dest: 'uploads/'
+    dest: conf.dest
 });
 
 var csrf = require('csurf');
