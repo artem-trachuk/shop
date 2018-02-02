@@ -1,4 +1,3 @@
-{{> messages}}
 <div class="row">
     <div class="col-12 col-lg-6 offset-lg-3">
         <nav aria-label="breadcrumb">
@@ -18,8 +17,8 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-12 col-lg-6 offset-lg-3">
-        <form action="/">
+    <div class="col-12 col-lg-6">
+        <form action="/admin/shipping-and-payment/shipping/{{shipping.id}}" method="POST">
             <div class="form-group">
                 <label for="name">Название способа доставки</label>
                 <input class="form-control" type="text" name="name" value="{{shipping.name}}">
@@ -29,16 +28,24 @@
                 <textarea class="form-control" type="text" name="description" rows="3">{{shipping.description}}</textarea>
             </div>
             <input type="hidden" name="_csrf" value="{{ csrfToken }}">
-            <button type="submit" class="btn btn-success" disabled>Сохранить</button>
+            <button type="submit" class="btn btn-success">Сохранить</button>
         </form>
-        <form action="/admin/shipping-and-payment/shipping/{{shipping._id}}/add-field" method="POST">
-            <div class="form-group">
-                <label for="name">Добавить поле</label>
-                <input class="form-control" type="text" name="name">
+    </div>
+    <div class="col-12 col-lg-6">
+        <form class="form-inline" action="/admin/shipping-and-payment/shipping/{{shipping._id}}/add-field" method="POST">
+            <div class="form-group mb-2">
+                <label class="mr-2" for="name">Добавить поле</label>
+                <input class="form-control mr-2" type="text" name="name">
             </div>
             <input type="hidden" name="_csrf" value="{{ csrfToken }}">
-            <button type="submit" class="btn btn-success">Добавить поле</button>
+            <button type="submit" class="btn btn-primary">Добавить поле</button>
         </form>
-        {{#each fields}} <span class="badge badge-pill badge-info">{{this.name}} <i class="far fa-dot-circle"></i></span> {{/each}}
+        <hr>
+        {{#each fields}}
+        <form class="form-inline mb-1" method="POST" action="/admin/shipping-and-payment/shipping/{{../shipping.id}}/shipping-field/{{id}}">
+            <input type="text" class="form-control mr-2" value="{{name}}" name="name">
+            <input type="hidden" name="_csrf" value="{{ ../csrfToken }}">
+            <button type="submit" class="btn btn-success btn-sm">Сохранить</button>
+        </form> {{/each}}
     </div>
 </div>

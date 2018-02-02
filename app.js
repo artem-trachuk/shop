@@ -73,6 +73,26 @@ hbs.registerHelper('filterSelected', (query, name, fieldvalue) => {
   }
 });
 
+hbs.registerHelper('statusSwitch', (status) => {
+  switch (status) {
+    case 1:
+      return 'Обрабатывается';
+      break;
+    case 2:
+      return 'На складе';
+      break;
+    case 3:
+      return 'Отправлен';
+      break;
+    case 4:
+      return 'Получен';
+      break;
+    case 5:
+      return 'Отказ';
+      break;
+  }
+});
+
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));

@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-md-3">{{> adminNavigation}}</div>
-    <div class="col-md-6">
+    <div class="col-md-9">
         <h2>Заказы</h2>
         <table class="table">
             <thead>
@@ -8,6 +8,7 @@
                     <th scope="col">Время</th>
                     <th scope="col">Пользователь</th>
                     <th scope="col">Номер заказа</th>
+                    <th scope="col">Статус</th>
                     <th scope="col"></th>
                 </tr>
             </thead>
@@ -17,6 +18,7 @@
                     <td>{{showDate this.orderDate}}</td>
                     <td>{{this.user}}</td>
                     <td>{{article}}</td>
+                    <td>{{statusSwitch status}}</td>
                     <td><a href="/admin/order/{{this.id}}"><i class="fas fa-arrow-right"></i></a></td>
                 </tr>
                 {{/each}}

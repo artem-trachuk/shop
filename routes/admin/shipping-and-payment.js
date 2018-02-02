@@ -84,6 +84,26 @@ router.get('/shipping/:id', (req, res, next) => {
     });
 });
 
+router.post('/shipping/:id', (req, res, next) => {
+    Shipping.findByIdAndUpdate(req.params.id, {
+        name: req.body.name,
+        description: req.body.description
+    })
+    .then(updRes => {
+        res.redirect('/admin/shipping-and-payment/shipping/' + req.params.id);
+    })
+});
+
+router.post('/shipping/:id/shipping-field/:fieldid', (req, res, next) => {
+    const fieldId = req.params.fieldid;
+    ShippingField.findByIdAndUpdate(fieldId, {
+        name: req.body.name
+    })
+    .then(updResult => {
+        res.redirect('/admin/shipping-and-payment/shipping/' + req.params.id);
+    });
+});
+
 router.post('/shipping/:id/add-field', (req, res, next) => {
     Shipping.findById(req.params.id)
         .then(shipping => {
@@ -104,6 +124,26 @@ router.post('/shipping/:id/add-field', (req, res, next) => {
         });
 }, (req, res, next) => {
     res.redirect('/admin/shipping-and-payment/shipping/' + req.params.id);
+});
+
+router.get('/payment/:id', (req, res, next) => {
+    Payment.findById(req.params.id)
+    .then(payment => {
+        res.locals.payment = payment;
+        res.render('admin/payment', {
+            csrfToken: req.csrfToken()
+        });
+    });
+});
+
+router.post('/payment/:id', (req, res, next) => {
+    Payment.findByIdAndUpdate(req.params.id, {
+        name: req.body.name,
+        description: req.body.description
+    })
+    .then(updResult => {
+        res.redirect('/admin/shipping-and-payment/payment/' + req.params.id);
+    })
 });
 
 module.exports = router;
