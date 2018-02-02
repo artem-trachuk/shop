@@ -12,11 +12,10 @@ var Product = require('../../models/product');
 var Category = require('../../models/category');
 var Field = require('../../models/field');
 var ProductData = require('../../models/product-data');
+var Counter = require('../../models/counter');
 
 /* GET Admin product editor. */
 router.get('/', function (req, res, next) {
-    var errors = req.flash('errors');
-    var success = req.flash('success');
     Category.find()
         .then(categories => {
             // Disable product creation cause of no categories
@@ -26,8 +25,6 @@ router.get('/', function (req, res, next) {
             } else {
                 res.render('admin/product', {
                     categories: categories,
-                    errors: errors,
-                    success: success,
                     csrfToken: req.csrfToken()
                 });
             }
@@ -37,13 +34,20 @@ router.get('/', function (req, res, next) {
 /* POST Admin product. */
 router.post('/', upload.single('productImage'), function (req, res, next) {
     product = req.body;
-    if (!Number.isInteger(parseInt(product.USDprice)) && !Number.isInteger(parseInt(product.price))) {
+    if (!Number.isInteger(parseInt(product.price))) {
         req.flash('errors', 'Необходимо указать стоимость.');
         return res.redirect('/admin/product');
     }
-    Product.create({
+    Counter.findOneAndUpdate({
+        $inc: {
+            product: 1
+        }
+    })
+    .then(counter => {
+        Product.create({
             title: product.title,
             price: product.price,
+            article: counter.product,
             USDprice: product.USDprice,
             description: product.description
         })
@@ -57,6 +61,7 @@ router.post('/', upload.single('productImage'), function (req, res, next) {
             });
         })
         .catch(err => console.log(err));
+    })
 });
 
 /* GET Admin product editor by id. */
@@ -265,7 +270,11 @@ router.post('/:id/data', function (req, res, next) {
                 done++;
             } else {
                 var f = field;
-                ProductData.findOneAndUpdate({
+                if (fields[f].length === 0) {
+                    done++;
+                    if (done === fieldsLength) next();
+                } else {
+                    ProductData.findOneAndUpdate({
                         productId: productId,
                         fieldId: f
                     }, {
@@ -289,6 +298,7 @@ router.post('/:id/data', function (req, res, next) {
                         }
                     })
                     .catch(err => console.log(err));
+                }
             }
         })(f);
     }

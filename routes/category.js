@@ -15,8 +15,9 @@ var buildCategories = require('./helpers/buildCategories');
 router.get('/:id', buildCategories, (req, res, next) => { // find all products in a category
     var categoryId = req.params.id;
     res.locals.categoryId = categoryId;
-    var fields = req.query;
+    var fields = res.locals.query = req.query;
     const fieldsLength = Object.keys(fields).length;
+    // find products with filters
     if (fieldsLength > 0) {
         var products = [];
         var done = 0;
@@ -61,8 +62,24 @@ router.get('/:id', buildCategories, (req, res, next) => { // find all products i
             .then(products => {
                 res.locals.products = products;
                 next();
+            })
+            .catch(err => {
+                next();
             });
     }
+}, (req, res, next) => {
+    Product.find({
+        categories: {
+            $all: req.params.id
+        }
+    })
+    .then(products => {
+        res.locals.allProducts = products;
+        next();
+    })
+    .catch(err => {
+        next();
+    });
 }, (req, res, next) => { // find fields for filters
     var allFields = [];
     // recursive
@@ -96,7 +113,7 @@ router.get('/:id', buildCategories, (req, res, next) => { // find all products i
                                 // get unique data values
                                 ProductData.find({
                                         productId: {
-                                            $in: res.locals.products
+                                            $in: res.locals.allProducts
                                         },
                                         fieldId: fields[index].id
                                     })
@@ -108,29 +125,29 @@ router.get('/:id', buildCategories, (req, res, next) => { // find all products i
                                             res.locals.fields = fields;
                                             next();
                                         }
+                                    })
+                                    .catch(err => {
+                                        //
                                     });
                             })(i);
                         };
+                    })
+                    .catch(err => {
+                        //
                     });
                 }
             });
     }
     findFields(req.params.id);
 }, (req, res, next) => { // render page
-    Config.findOne()
-        .then(conf => {
-            res.render('category', {
-                title: 'category',
-                exchangeRate: conf.USDtoUAH,
-                csrfToken: req.csrfToken()
-            });
-        });
-});
-
-router.post('/', (req, res, next) => {
-    res.render('category', {
-        title: 'category',
-        csrfToken: req.csrfToken()
+    Category.findById(req.params.id)
+    .then(category => {
+        res.locals.title = category.name + ' - ' + res.locals.shopTitle;
+        res.render('category');
+    })
+    .catch(err => {
+        req.flash('errors', 'Не удалось выполнить запрос.');
+        res.redirect('/');
     });
 });
 

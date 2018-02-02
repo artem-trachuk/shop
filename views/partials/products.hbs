@@ -5,30 +5,27 @@
             <div class="col-7">
                 <div class="row">
                     <div class="col">
-                        <a href="/product/{{this._id}}" class="text-white">
-                            <h6 class="text-center bg-success font-weight-bold border border-success rounded">{{this.title}}</h6>
+                        <a href="/product/{{_id}}" class="text-white">
+                            <h6 class="text-center bg-success font-weight-bold border border-success rounded">{{title}}</h6>
                         </a>
                     </div>
                     <div class="w-100"></div>
                     <div class="col">
-                        <small>{{this.description}}</small>
+                        <small>{{description}}</small>
                     </div>
                 </div>
             </div>
             <div class="col-5">
-                <img class="w-100" src="{{this.imagePath}}" alt="{{this.title}}">
+                <img class="w-100" src="{{imagePath}}" alt="{{title}}">
             </div>
         </div>
         <div class="row">
             <div class="col-10 text-right">
-                {{#if this.USDprice}}
-                <h4>{{getUAHprice this.USDprice ../exchangeRate}} грн</h4>
-                {{else}}
-                <h4>{{this.price}} грн</h4>
-                {{/if}}
+                <h4>{{price}} грн.{{#if USDprice}}
+                    <span class="text-secondary"> (${{USDprice}})</span>{{/if}}</h4>
             </div>
             <div class="col-2">
-                <a href="/add-to-cart/{{this._id}}" class="text-success">
+                <a href="/cart/add-to-cart/{{_id}}" class="text-success">
                     <h4>
                         <i class="fas fa-cart-arrow-down"></i>
                     </h4>

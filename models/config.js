@@ -1,10 +1,6 @@
 var mongoose = require('mongoose');
 
 var configSchema = new mongoose.Schema({
-    USDtoUAH: {
-        type: Number,
-        default: 1
-    },
     title: {
         type: String,
         default: 'Kalynovskyi & Co.'

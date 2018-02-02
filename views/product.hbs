@@ -10,23 +10,20 @@
       <div class="card-body">
         <h4 class="card-title">{{product.title}}</h4>
         <p class="card-text">{{product.description}}</p>
+        <p class="card-text">Код товара: {{product.article}}</p>
         <table class="table">
           <tbody>
             {{#each fields}}
             <tr>
-              <td>{{this.name}}</td>
-              <td>{{this.value}}</td>
+              <td>{{name}}</td>
+              <td>{{value}}</td>
             </tr>
             {{/each}}
           </tbody>
         </table>
         <div class="clearfix">
-          {{#if product.USDprice}}
-          <p class="float-left">{{getUAHprice product.USDprice exchangeRate}}</p>
-          {{else}}
-          <p class="float-left">{{product.price}}</p>
-          {{/if}}
-          <a href="/add-to-cart/{{product._id}}" class="btn btn-success float-right">Добавить в корзину</a>
+          <h4>{{product.price}} грн.{{#if product.USDprice}}<span class="text-secondary"> (${{product.USDprice}})</span>{{/if}}</h4>
+          <a href="/cart/add-to-cart/{{product._id}}" class="btn btn-success float-right">Добавить в корзину</a>
         </div>
       </div>
     </div>

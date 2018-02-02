@@ -18,9 +18,12 @@ module.exports = function buildCategories(req, res, next) {
                             findCategoriesRecursive(categoriesByParent, categoriesCount, cb);
                         }
                     }
+                })
+                .catch(err => {
+                    //
                 });
         });
-    }
+    };
     Category.count()
         .then(count => {
             if (count === 0) {
@@ -32,10 +35,23 @@ module.exports = function buildCategories(req, res, next) {
                     }
                 })
                 .then(categories => {
+                    if (categories.length === 0) {
+                        return next();
+                    }
+                    if (categories.length === count) {
+                        res.locals.categories = categories;
+                        return next();
+                    }
                     findCategoriesRecursive(categories, count - categories.length, (result) => {
                         res.locals.categories = categories;
                         next();
                     });
+                })
+                .catch(err => {
+                    next();
                 });
+        })
+        .catch(err => {
+            next();
         });
 }

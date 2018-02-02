@@ -15,13 +15,18 @@ var passport = require('passport');
 var flash = require('connect-flash');
 
 var Config = require('./models/config');
+var User = require('./models/user');
+var Almighty = require('./models/almighty');
+var Counter = require('./models/counter');
 
 var index = require('./routes/index');
 var category = require('./routes/category');
+var cart = require('./routes/cart');
 var admin = require('./routes/admin');
 var user = require('./routes/user');
 var product = require('./routes/admin/product');
 var adminCategory = require('./routes/admin/category');
+var shippingAndPayment = require('./routes/admin/shipping-and-payment');
 var deleteData = require('./routes/admin/delete');
 
 mongoose.connect(shopConfig.mongodburl)
@@ -48,15 +53,24 @@ app.set('view engine', 'hbs');
 hbs.registerPartials(__dirname + '/views/partials');
 hbs.registerPartials(__dirname + '/views/partials/admin');
 
-// register hbs helper to calculate price
-hbs.registerHelper('getUAHprice', function (usdprice, rate) {
-  return (usdprice * rate).toFixed(0);
+// register hbs helper
+hbs.registerHelper('showDate', function (date) {
+  return date.toDateString();
 });
 
-// register hbs helper
+// register hbs helper (show selected category in select list of admin/category page)
 hbs.registerHelper('optionHelper', (selectedValue, selectValue) => {
   if (selectedValue === selectValue) return 'selected';
   return;
+});
+
+// register hbs helper (show selected filters)
+hbs.registerHelper('filterSelected', (query, name, fieldvalue) => {
+  if (Object.keys(query).length > 0 && query[name]) {
+    if (query[name].indexOf(fieldvalue) > -1) {
+      return 'checked';
+    }
+  }
 });
 
 // uncomment after placing your favicon in /public
@@ -85,31 +99,52 @@ app.use(express.static(path.join(__dirname, 'public')));
 // static path to uploaded files
 app.use('/uploads/', express.static('uploads'));
 
-// save authenticate status and session to global variables
+// load total quantity from session (if not auth) or mongo then save to res.locals
 app.use(function (req, res, next) {
-  res.locals.login = req.isAuthenticated();
-  res.locals.session = req.session;
-  next();
+  if (req.user) {
+    res.locals.profile = req.user;
+    User.findById(req.user.id)
+      .then(user => {
+        if (user.cart) {
+          res.locals.totalQty = user.cart.totalQty;
+        }
+        next();
+      });
+  } else if (req.session.cart) {
+    res.locals.totalQty = req.session.cart.totalQty;
+    next();
+  } else {
+    next();
+  }
 });
 
 // load footer data
 app.get('*', (req, res, next) => {
   Config.findOne()
-  .then(conf => {
-    res.locals.shopTitle = conf.title;
-    res.locals.shopDescription = conf.description;
-    res.locals.shopAddress = conf.address;
-    res.locals.shopNumber = conf.phone;
-    next();
-  });
+    .then(conf => {
+      res.locals.shopTitle = conf.title;
+      res.locals.shopDescription = conf.description;
+      res.locals.shopAddress = conf.address;
+      res.locals.shopNumber = conf.phone;
+      next();
+    });
+});
+
+// load flash errors & success messages
+app.get('*', (req, res, next) => {
+  res.locals.errors = req.flash('errors');
+  res.locals.success = req.flash('success');
+  next();
 });
 
 app.use('/', index);
 app.use('/category', category);
+app.use('/cart', cart);
 app.use('/user', user);
 app.use('/admin', admin);
 app.use('/admin/product', product);
 app.use('/admin/category', adminCategory);
+app.use('/admin/shipping-and-payment', shippingAndPayment);
 app.use('/admin/delete', deleteData);
 
 // catch 404 and forward to error handler
@@ -144,5 +179,17 @@ Config.findOne(function (err, doc) {
     })
   }
 });
+
+Counter.findOne()
+.then(counter => {
+  if (!counter) {
+    Counter.create({});
+  }
+});
+
+// Add admin
+// Almighty.create({
+//   user: "5a7440997f4acb4051de1746"
+// });
 
 module.exports = app;

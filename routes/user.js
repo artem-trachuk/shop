@@ -2,12 +2,20 @@ var express = require('express');
 var router = express.Router();
 var passport = require('passport');
 
+var Order = require('../models/order');
+
 var csrf = require('csurf');
 router.use(csrf());
 
 /* GET profile page. */
 router.get('/profile', isLoggedIn, function (req, res, next) {
-    res.render('user/profile');
+    Order.find({
+        user: req.user.id
+    })
+    .then(orders => {
+        res.locals.orders = orders;
+        res.render('user/profile');
+    })
 });
 
 /* GET logout. */
@@ -15,6 +23,10 @@ router.get('/logout', isLoggedIn, function(req, res, next) {
     req.logout();
     res.redirect('/');
 });
+
+router.use((req, res, next) => {
+    res.redirect('/');
+})
 
 router.use('/', notLoggedIn, function(req, res, next) {
     next();

@@ -1,0 +1,137 @@
+<div class="row">
+    <div class="col-12 col-lg-6 offset-lg-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="/admin/">Панель управления</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="/admin/orders/">Заказы</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">{{order.id}}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12 col-lg-6">
+        <div class="row">
+            <div class="col-12">
+                <table class="table bg-light">
+                    <tbody>
+                        <tr>
+                            <td class="font-weight-bold">Дата заказа</td>
+                            <td>{{showDate order.orderDate}}</td>
+                        </tr>
+                        {{#if order.reciveDate}}
+                        <tr>
+                            <td class="font-weight-bold">Дата получения</td>
+                            <td>{{showDate order.reciveDate}}</td>
+                        </tr>
+                        {{/if}}
+                        <tr>
+                            <td class="font-weight-bold">Статус заказа</td>
+                            <td>{{status}}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <span class="text-info font-weight-bold float-right">Доставка</span>
+                            </td>
+                        </tr>
+                        {{#each shippingFields}}
+                        <tr>
+                            <td>
+                                <strong>{{this.name}}</strong>
+                            </td>
+                            <td>{{this.data}} </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+                <form action="/admin/order/{{order.id}}/status/" method="POST">
+                    <div class="form-group">
+                        <label for="statusSelect">Изменить статус</label>
+                        <select class="form-control" id="statusSelect" name="statusSelect">
+                            <option value="1">Обрабатывается</option>
+                            <option value="2">На складе</option>
+                            <option value="3">Отправлен</option>
+                            <option value="4">Получен</option>
+                            <option value="5">Отказ</option>
+                        </select>
+                    </div>
+                    <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                    <button type="submit" class="btn btn-primary btn-sm float-right">Изменить</button>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <form action="/admin/order/{{order.id}}/notes" method="POST">
+                    <div class="form-group">
+                        <label for="clientNote">Заметка для покупателя</label>
+                        <textarea class="form-control" id="clientNote" name="clientNote" rows="3">{{order.clientNote}}</textarea>
+                        <small>Данную заметку покупатель увидит в своём профиле открыв заказ.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="workingNote">Рабочая заметка</label>
+                        <textarea class="form-control" id="workingNote" name="workingNote" rows="3">{{order.workingNote}}</textarea>
+                        <small>Рабочая заметка, видна только на этой странице.</small>
+                    </div>
+                    <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                    <button type="submit" class="btn btn-success btn-sm">Сохранить заметки</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+        <h4 class="float-right">Товары</h4>
+        <table class="table">
+            <tbody>
+                {{#each order.cart.products }}
+                <tr>
+                    <td>{{product.title}}</td>
+                    <td>{{qty}}</td>
+                    <td>{{price}}</td>
+                    <td>
+                        <form class="form-inline" action="/admin/guarantees" method="POST">
+                            <div class="form-group">
+                                <input type="text" name="serial" class="form-control mr-lg-1" placeholder="Серийный номер">
+                                <input type="hidden" name="order" value="{{../order.id}}">
+                                <input type="hidden" name="productTitle" value="{{product.title}}">
+                                <input type="hidden" name="product" value="{{product.id}}">
+                                <input type="hidden" name="_csrf" value="{{ ../csrfToken }}">
+                                <button type="submit" class="btn btn-primary btn-sm">Добавить</button>
+                            </div>
+                        </form>
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        {{#if guarantees}}
+        <h3>Гарантии</h3>
+        <table class="table">
+            <thead>
+                <th scope="col">Товар</th>
+                <th scope="col">Серийный номер</th>
+                <th scope="col"></th>
+            </thead>
+            <tbody>
+                {{#each guarantees}}
+                <tr>
+                    <td>
+                        <a href="/product/{{this.product}}" class="text-dark font-weight-bold">{{productTitle}}</a>
+                    </td>
+                    <td>{{serial}}</td>
+                    <td>
+                        <a href="/" class="text-info">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        {{/if}}
+    </div>
+</div>

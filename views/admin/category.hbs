@@ -1,4 +1,3 @@
-{{> messages}}
 <div class="row">
     <div class="col-12 col-lg-6 offset-lg-3">
         <nav aria-label="breadcrumb">
@@ -20,7 +19,7 @@
         <div class="clearfix">
             <h2 class="float-left">{{category.name}}</h2>
             <!-- Button trigger modal -->
-            <button disabled type="button" class="btn btn-danger float-right" data-toggle="modal" data-target="#deleteModal">
+            <button type="button" class="btn btn-danger float-right" data-toggle="modal" data-target="#deleteModal">
                 Удалить
             </button>
 
@@ -37,10 +36,10 @@
                             </button>
                         </div>
                         <div class="modal-body">
+                            <p>Удаление невозможно, если в категории есть продукты.</p>
                             <p>Удаление категории приведет к следующим последствиям:</p>
                             <ul>
-                                <li>поля, которые используются только этой категорией, будут удалены вместе с содержимыми данными</li>
-                                <li>продукты, которые относятся только к этой категории, будут удалены</li>
+                                <li>подкатегория данной категории перейдет на верхний уровень</li>
                             </ul>
                         </div>
                         <div class="modal-footer">

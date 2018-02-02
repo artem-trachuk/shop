@@ -9,12 +9,11 @@ var Field = require('../../models/field');
 
 /* GET Admin Category editor */
 router.get('/', function (req, res, next) {
-    var errors = req.flash('errors');
+    res.locals.title = 'Панель управления / Категории / Создать категорию - ' + res.locals.shopTitle;
     Category.find()
         .then(categories => {
             res.render('admin/category', {
                 categories: categories,
-                errors: errors,
                 csrfToken: req.csrfToken()
             });
         })
@@ -55,13 +54,11 @@ router.post('/', function (req, res, next) {
 /* GET Admin Category editor by id */
 router.get('/:id', function (req, res, next) {
     var categoryId = req.params.id;
-    var errors = req.flash('errors');
-    var success = req.flash('success');
     Category.findById(categoryId)
         .then(c => {
             Category.find({
-                name: {
-                    $ne: c.name
+                _id: {
+                    $ne: c._id
                 }
             })
             .then(categories => {
@@ -72,9 +69,7 @@ router.get('/:id', function (req, res, next) {
                 res.render('admin/category', {
                     category: c,
                     categories: categories,
-                    success: success,
                     selectedValue: selectedValue,
-                    errors: errors,
                     csrfToken: req.csrfToken()
                 });
             });
@@ -104,7 +99,16 @@ router.post('/:id', function (req, res, next) {
 });
 
 /* GET Admin Category Fields. */
-router.get('/:id/fields/', function (req, res, next) {
+router.get('/:id/fields/', (req, res, next) => {
+    Field.find()
+    .then(fields => {
+        res.locals.allFields = fields;
+        next();
+    })
+    .catch(err => {
+        next();
+    });
+}, function (req, res, next) {
     var categoryId = req.params.id;
     // Find category
     Category.findById(categoryId)
@@ -173,6 +177,16 @@ router.post('/:id/field', function (req, res, next) {
                     });
             });
     }
+});
+
+router.get('/:categoryId/add-field/:fieldId', (req, res, next) => {
+    Category.findByIdAndUpdate(req.params.categoryId, {
+        $push: {
+            fields: req.params.fieldId
+        }
+    }).then(updRes => {
+        res.redirect('/admin/category/' + req.params.categoryId + '/fields');
+    })
 });
 
 module.exports = router;

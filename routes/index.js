@@ -1,21 +1,23 @@
 var express = require('express');
 var router = express.Router();
+var passport = require('passport');
 
 var csrf = require('csurf');
 router.use(csrf());
 
 var Product = require('../models/product');
-var Cart = require('../models/cart');
 var Config = require('../models/config');
 var Order = require('../models/order');
 var Category = require('../models/category');
 var ProductData = require('../models/product-data');
 var Field = require('../models/field');
+var User = require('../models/user');
 
 var buildCategories = require('./helpers/buildCategories');
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
+  // find all products which have at least one category
   Product.find({
       categories: {
         $not: {
@@ -27,23 +29,14 @@ router.get('/', function (req, res, next) {
       res.locals.products = products;
       next();
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+      req.flash('errors', 'Не удалось загрузить список продуктов.');
+      next();
+    });
 }, buildCategories, (req, res, next) => {
-  var messages = req.flash('messages');
-  Config.findOne()
-    .then(conf => {
-      res.render('index', {
-        title: conf.title + ' - магазин сетевого оборудования от специалистов, которые с ним работают',
-        messages: messages,
-        exchangeRate: conf.USDtoUAH,
-        csrfToken: req.csrfToken()
-      });
-    })
-    .catch(err => console.log(err));
-});
-
-router.post('/', (req, res, next) => {
-
+  req.session.callbackUrl = '/';
+  res.locals.title = res.locals.shopTitle + ' - магазин сетевого оборудования от специалистов, которые с ним работают';
+  res.render('index');
 });
 
 /* GET Products by Search query */
@@ -56,7 +49,7 @@ router.get('/search', (req, res, next) => {
     })
     .then(products => {
       res.locals.products = products;
-      next();
+      res.render('index');
     })
 })
 
@@ -97,76 +90,48 @@ router.get('/product/:id', (req, res, next) => {
     });
 });
 
-/* Add to cart. */
-router.get('/add-to-cart/:id', function (req, res, next) {
-  var productId = req.params.id;
-  var cart = new Cart(req.session.cart ? req.session.cart : {});
+router.get('/fb-login', passport.authenticate('fb-signin'));
 
-  // Find requested item
-  Product.findById(productId, function (err, product) {
-    if (err) {
-      return res.redirect('/');
-    }
-    // Add product to user cart
-    cart.add(product, product.id)
-      .then(() => {
-        // Save cart into session
-        req.session.cart = cart;
-        res.redirect('/');
-      });
-  });
-});
-
-/* GET Cart. */
-router.get('/cart', function (req, res, next) {
-  // Empty cart
-  if (!req.session.cart) {
-    return res.render('cart', {
-      products: null
-    });
-  }
-  var cart = new Cart(req.session.cart);
-  res.render('cart', {
-    products: cart.generateArr(),
-    totalPrice: cart.totalPrice.toFixed(0),
-  });
-});
-
-/* GET Checkout. */
-router.get('/checkout', function (req, res, next) {
-  // Empty cart
-  if (!req.session.cart) {
-    return res.redirect('/cart');
-  }
-  res.render('checkout', {
-    csrfToken: req.csrfToken()
-  });
-});
-
-/* POST Checkout. */
-router.post('/checkout', function (req, res, next) {
-  // Empty cart
-  if (!req.session.cart) {
-    return res.redirect('/cart');
-  }
-  var delivery = req.body;
-  var userCart = req.session.cart;
-  var order = new Order({
-    cart: userCart,
-    delivery: {
-      address: delivery.address,
-      name: delivery.name
-    },
-    user: req.user._id,
-    orderDate: new Date()
-  });
-  Order.create(order)
-    .then(o => {
+router.get('/fb-callback', passport.authenticate('fb-signin', {
+  failureRedirect: '/',
+}), (req, res, next) => {
+  if (req.session.cart) {
+    User.findByIdAndUpdate(req.user.id, {
+      cart: req.session.cart,
+    }).then(updateResult => {
       req.session.cart = null;
-      req.flash('success', 'Заказ оформлен.');
-      res.redirect('/');
+      next();
     })
-    .catch(err => {});
+    .catch(err => {
+      next();
+    });
+  } else {
+    next();
+  }
+}, (req, res, next) => {
+  if (req.session.orders) {
+    var done = 0;
+    var orders = req.session.orders;
+    orders.forEach(order => {
+      Order.findByIdAndUpdate(order, {
+          user: req.user.id
+        })
+        .then(updRes => {
+          done++;
+          if (done === orders.length) {
+            req.session.orders = null;
+            next();
+          }
+        })
+        .catch(err => {
+          //
+        });
+    });
+  } else {
+    next();
+  }
+}, (req, res, next) => {
+  res.redirect('/');
 });
 
 module.exports = router;

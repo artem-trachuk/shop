@@ -1,0 +1,44 @@
+{{> messages}}
+<div class="row">
+    <div class="col-12 col-lg-6 offset-lg-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="/admin/">Панель управления</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="/admin/shipping-and-payment/">Доставка и оплата</a>
+                </li>
+                <li class="breadcrumb-item">
+                    Доставка
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">{{shipping.name}}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12 col-lg-6 offset-lg-3">
+        <form action="/">
+            <div class="form-group">
+                <label for="name">Название способа доставки</label>
+                <input class="form-control" type="text" name="name" value="{{shipping.name}}">
+            </div>
+            <div class="form-group">
+                <label for="description">Описание способа доставки</label>
+                <textarea class="form-control" type="text" name="description" rows="3">{{shipping.description}}</textarea>
+            </div>
+            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+            <button type="submit" class="btn btn-success" disabled>Сохранить</button>
+        </form>
+        <form action="/admin/shipping-and-payment/shipping/{{shipping._id}}/add-field" method="POST">
+            <div class="form-group">
+                <label for="name">Добавить поле</label>
+                <input class="form-control" type="text" name="name">
+            </div>
+            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+            <button type="submit" class="btn btn-success">Добавить поле</button>
+        </form>
+        {{#each fields}} <span class="badge badge-pill badge-info">{{this.name}} <i class="far fa-dot-circle"></i></span> {{/each}}
+    </div>
+</div>

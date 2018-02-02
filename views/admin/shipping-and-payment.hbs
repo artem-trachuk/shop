@@ -12,13 +12,90 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-12 col-lg-8 offset-lg-2">
+    <div class="col-12">
         <div class="row">
             <div class="col-12 col-lg-6">
                 <h2>Доставка</h2>
+                {{#if ships}}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Название способа доставки</th>
+                            <th scope="col">Описание</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each ships}}
+                        <tr>
+                            <td>{{this.name}}</td>
+                            <td>{{this.description}}</td>
+                            <td>
+                                <a href="/admin/shipping-and-payment/shipping/{{this._id}}">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+                {{/if}}
+                <form class="bg-light p-2" action="/admin/shipping-and-payment/add-shipping" method="POST">
+                    <h5 class="float-right text-success">Добавить способ доставки</h5>
+                    <div class="form-group">
+                        <label for="name">Название способа доставки</label>
+                        <input class="form-control" type="text" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Описание способа доставки</label>
+                        <textarea class="form-control" name="description" id="" rows="3" required></textarea>
+                        <small>Описание отображается в корзине и при оформлении заказа.</small>
+                    </div>
+                    <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                    <button type="submit" class="btn btn-secondary float-right">Далее</button>
+                </form>
             </div>
             <div class="col-12 col-lg-6">
                 <h2>Оплата</h2>
+                {{#if payments}}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Название способа оплаты</th>
+                            <th scope="col">Описание</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each payments}}
+                        <tr>
+                            <td>{{this.name}}</td>
+                            <td>{{this.description}}</td>
+                            <td>
+                                <a href="/">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+                {{/if}}
+                <hr>
+                <form class="bg-light p-2" action="/admin/shipping-and-payment/add-payment" method="POST">
+                    <h5 class="float-right text-success">Добавить способ оплаты</h5>
+                    <div class="form-group">
+                        <label for="name">Название способа оплаты</label>
+                        <input class="form-control" type="text" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Описание способа оплаты</label>
+                        <textarea class="form-control" name="description" id="" rows="3" required></textarea>
+                        <small>Описание отображается в корзине и при оформлении заказа.</small>
+                    </div>
+                    <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                    <button type="submit" class="btn btn-success float-right">Добавить</button>
+                </form>
             </div>
         </div>
     </div>

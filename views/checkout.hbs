@@ -1,22 +1,27 @@
 <div class="row">
-    <div class="col-md-4 offset-md-4">
-        <h1>Оформить заказ</h1>
-        {{#if hasErrors}}
-        <div class="alert alert-danger" role="alert">
-            {{#each messages}} {{this}} {{/each}}
+    <div class="col-12 col-lg-6 offset-lg-3">
+        <h2>Оформить заказ</h2>
+        <div class="text-right">
+            <h5>{{shipping.name}}</h5>
+            <p class="text-secondary">{{shipping.description}}</p>
         </div>
-        {{/if}}
-        <form action="/checkout" method="post">
+        <div class="text-right">
+            <h5>{{payment.name}}</h5>
+            <p class="text-secondary">{{payment.description}}</p>
+        </div>
+        <form action="/cart/checkout" method="POST">
+            {{#each shippingFields}}
             <div class="form-group">
-                <label for="address">Адрес</label>
-                <input class="form-control" type="text" id="address" name="address" required>
+                <label for="">{{this.name}}</label>
+                <input type="text" class="form-control" name="{{this.id}}" required>
             </div>
-            <div class="form-group">
-                <label for="name">Имя</label>
-                <input class="form-control" type="text" id="name" name="name" required>
-            </div>
+            {{/each}}
             <input type="hidden" name="_csrf" value="{{ csrfToken }}">
-            <button class="btn btn-primary" type="submit">Оформить</button>
+            <div class="clearfix">
+                <button type="submit" class="btn btn-success float-right">Готово
+                    <i class="far fa-thumbs-up"></i>
+                </button>
+            </div>
         </form>
     </div>
 </div>

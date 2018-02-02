@@ -3,13 +3,14 @@ var bcrypt = require('bcrypt');
 
 var userSchema = new mongoose.Schema({
     username: {
-        type: String,
-        required: true
+        type: String
     },
     password: {
-        type: String,
-        required: true
-    }
+        type: String
+    },
+    displayName: String,
+    fbId: String,
+    cart: Object
 });
 
 userSchema.methods.encryptPassword = function (password, cb) {

@@ -1,0 +1,17 @@
+<div class="row">
+    <div class="col-12 col-lg-3">
+        {{> adminNavigation}}
+    </div>
+    <div class="col-12 col-lg-6">
+        <h5>Поля</h5>
+        {{#each fields}}
+        <form class="form-inline mb-2" action="/admin/field/{{_id}}" method="POST">
+            <div class="form-group">
+                <input class="form-control mr-2" name="fieldName" type="text" value="{{name}}" required>
+            </div>
+            <input type="hidden" name="_csrf" value="{{ ../csrfToken }}">
+            <button type="submit" class="btn btn-success btn-sm">Сохранить</button>
+        </form>
+        {{/each}}
+    </div>
+</div>

@@ -1,4 +1,3 @@
-{{> messages}}
 <div class="row">
     <div class="col-12 col-lg-6 offset-lg-3">
         <nav aria-label="breadcrumb">
@@ -18,7 +17,14 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-lg-4 offset-lg-4">
+    <div class="col-12 col-lg-3 text-right">
+        {{#each allFields}}
+        <div class="mb-2">
+            {{name}} <a class="text-success" href="/admin/category/{{../category._id}}/add-field/{{id}}"><i class="fas fa-arrow-right"></i></a>
+        </div>
+        {{/each}}
+    </div>
+    <div class="col-12 col-lg-4 offset-lg-1">
         <h2>{{category.title}}</h2>
         <form action="/admin/category/{{category._id}}/field" method="post">
             <div class="form-group">
@@ -33,7 +39,9 @@
         <div class="row mt-3">
             <div class="col-12">
                 {{#each fields}}
-                <span class="badge badge-secondary">{{this}} <i class="far fa-dot-circle"></i></span> {{/each}}
+                <span class="badge badge-secondary">{{this}}
+                    <i class="far fa-dot-circle"></i>
+                </span> {{/each}}
             </div>
         </div>
     </div>

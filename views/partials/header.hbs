@@ -8,10 +8,13 @@
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item">
-        <a class="nav-link" href="#">
+        <a class="nav-link" href="/shipping-and-payment">
           <i class="fas fa-truck"></i> Доставка и оплата</a>
       </li>
-      <li class="nav-item dropdown">
+      <li class="nav-item">
+        <span class="nav-link"><i class="fas fa-phone"></i> {{shopNumber}}</span>
+      </li>
+      {{!-- <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true"
           aria-expanded="false">
           <i class="fas fa-briefcase"></i> Услуги
@@ -26,30 +29,22 @@
       <li class="nav-item">
         <a class="nav-link" href="#">
           <i class="fas fa-building"></i> О нас</a>
-      </li>
-
+      </li> --}}
     </ul>
     <ul class="navbar-nav">
       <li class="nav-item">
         <a class="nav-link" href="/cart">
-          <i class="fas fa-shopping-cart"></i> Корзина <span class="badge badge-success">{{session.cart.totalQty}}</span></a>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true"
-          aria-expanded="false">
-          <i class="fas fa-user"></i> Учетная запись
+          <i class="fas fa-shopping-cart"></i> Корзина
+          <span class="badge badge-success">{{totalQty}}</span>
         </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          {{#if login}}
-          <a class="dropdown-item" href="/user/profile">Профиль</a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="/user/logout">Выйти</a>
-          {{else}}
-          <a class="dropdown-item" href="/user/signin">Войти</a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="/user/signup">Регистрация</a>
-          {{/if}}
-        </div>
+      </li>
+      <li class="nav-item">
+        {{#if profile}}
+        <a class="nav-link" href="/user/profile">
+          <i class="fas fa-user"></i> {{profile.displayName}}</a>
+        {{else}}
+        <a class="nav-link" href="/fb-login"><i class="fab fa-facebook-square"></i> Вход через Facebook</a>
+        {{/if}}
       </li>
     </ul>
   </div>

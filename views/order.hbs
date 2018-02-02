@@ -1,0 +1,83 @@
+<div class="row">
+    <div class="col-12 col-lg-6 offset-lg-3">
+        <h4>Ваш заказ</h4>
+        <table class="table bg-light">
+            <tbody>
+                <tr>
+                    <td class="font-weight-bold">Дата заказа</td>
+                    <td>{{showDate order.orderDate}}</td>
+                </tr>
+                {{#if order.reciveDate}}
+                <tr>
+                    <td class="font-weight-bold">Дата получения</td>
+                    <td>{{showDate order.reciveDate}}</td>
+                </tr>
+                {{/if}}
+                <tr>
+                    <td class="font-weight-bold">Статус заказа</td>
+                    <td>{{status}}</td>
+                </tr>
+                <tr>
+                    <td class="font-weight-bold">Номер заказа</td>
+                    <td>{{order.article}}</td>
+                </tr>
+                {{#if order.clientNote}}
+                <tr>
+                    <td colspan="2" class="text-right font-italic text-info">{{order.clientNote}}</td>
+                </tr>
+                {{/if}}
+                <tr>
+                    <td colspan="2" class="text-right">
+                        <span class="text-info font-weight-bold">Доставка ({{shipping}})</span>
+                    </td>
+                </tr>
+                {{#each shippingData}}
+                <tr>
+                    <td>
+                        <strong>{{fieldName}}</strong>
+                    </td>
+                    <td>{{fieldData}} </td>
+                </tr>
+                {{/each}}
+                <tr>
+                    <td colspan="2" class="text-right">
+                        <span class="text-info font-weight-bold">Оплата ({{payment}})</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Наименование товара</th>
+                    <th scope="col">Количество</th>
+                    <th scope="col">Стоимость</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each order.cart.products}}
+                <tr>
+                    <td>
+                        <a class="text-dark" href="/product/{{product.id}}">
+                            <strong>{{product.title}}</strong>
+                        </a>
+                    </td>
+                    <td>
+                        <span class="border text-success p-1 m-1">{{qty}} шт.</span>
+                    </td>
+                    <td>{{price}} грн.</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        <h4>Общая стоимость {{order.cart.totalPrice}} грн.</h4>
+        {{#if profile}} {{else}}
+        <div>
+            <span>Сохраните ссылку для слежения за информацией о заказе:</span>
+            <code>http://shop.ps.od.ua/cart/order/{{order._id}}</code>
+            <small>Информация о заказе будет доступна только из этого веб-браузера до истечения сессии.</small>
+            {{order.clientNote}}
+        </div>
+        {{/if}}
+    </div>
+</div>
