@@ -12,7 +12,6 @@ var schemaTypes = mongoose.Schema.Types;
 var orderSchema = new mongoose.Schema({
     cart: Object,
     status: { type: Number, default: 1 },
-    statusMsg: { type: String },
     user: {
         type: schemaTypes.ObjectId,
         ref: 'User'

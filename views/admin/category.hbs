@@ -62,7 +62,7 @@
                 <select class="form-control" id="parentCategory" name="parentCategory" {{#if category.parentCategoryId}}disabled{{/if}}>
                     <option disabled selected>Выберите категорию</option>
                     {{#each categories}}
-                    <option value={{this.id}} {{optionHelper ../selectedValue this.id}}>{{this.name}}</option>
+                    <option value={{id}} {{optionHelper ../selectedValue id}}>{{name}}</option>
                     {{/each}}
                 </select>
             </div>

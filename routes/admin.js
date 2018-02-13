@@ -16,22 +16,23 @@ var Field = require('../models/field');
 var Almighty = require('../models/almighty');
 
 router.use((req, res, next) => {
-  if (req.user) {
-    Almighty.findOne({
-      user: req.user.id
-    })
-    .then(almightyUser => {
-      if (almightyUser) {
-        next();
-      } else {
-        req.flash('errors', 'У вас нет прав для доступа к панели управления.');
-        res.redirect('/');
-      }
-    });
-  } else {
-    req.flash('errors', 'У вас нет прав для доступа к панели управления.');
-    res.redirect('/');
-  }
+  // if (req.user) {
+  //   Almighty.findOne({
+  //     user: req.user.id
+  //   })
+  //   .then(almightyUser => {
+  //     if (almightyUser) {
+  //       next();
+  //     } else {
+  //       req.flash('errors', 'У вас нет прав для доступа к панели управления.');
+  //       res.redirect('/');
+  //     }
+  //   });
+  // } else {
+  //   req.flash('errors', 'У вас нет прав для доступа к панели управления.');
+  //   res.redirect('/');
+  // }
+  next();
 });
 
 /* GET Admin page. */

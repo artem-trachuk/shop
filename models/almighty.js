@@ -8,4 +8,4 @@ var almightySchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('Almighty' ,almightySchema);
+module.exports = mongoose.model('Almighty', almightySchema);
