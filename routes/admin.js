@@ -8,9 +8,7 @@ var Config = require('../models/config');
 var Product = require('../models/product');
 var Order = require('../models/order');
 var Category = require('../models/category');
-var ProductData = require('../models/product-data');
 var ShippingField = require('../models/shipping-field');
-var ShippingFieldData = require('../models/shipping-field-data');
 var Guarantee = require('../models/guarantee');
 var Field = require('../models/field');
 var Almighty = require('../models/almighty');
@@ -104,25 +102,18 @@ router.get('/order/:id', (req, res, next) => {
         case 5:
           res.locals.status = 'Отказ';
           break;
-      }
-      return ShippingFieldData.find({
-        orderId: {
-          $in: order.id
-        }
-      })
-    })
-    .then(fields => {
+      };
       var shippingFields = [];
       var done = 0;
-      fields.forEach(field => {
-        ShippingField.findById(field.fieldId)
+      order.shippingFieldData.forEach(data => {
+        ShippingField.findById(data.fieldId)
           .then(f => {
             shippingFields.push({
               name: f.name,
-              data: field.fieldData
+              data: data.fieldValue
             });
             done++;
-            if (done === fields.length) {
+            if (done === order.shippingFieldData.length) {
               res.locals.shippingFields = shippingFields;
               next();
             }
@@ -163,9 +154,9 @@ router.post('/order/:id/status', (req, res, next) => {
     updateOrder.reciveDate = new Date();
   }
   Order.findByIdAndUpdate(req.params.id, updateOrder)
-  .then(updateResult => {
-    res.redirect('/admin/order/' + req.params.id);
-  });
+    .then(updateResult => {
+      res.redirect('/admin/order/' + req.params.id);
+    });
 });
 
 router.post('/guarantees', (req, res, next) => {
@@ -200,30 +191,30 @@ router.get('/categories', function (req, res, next) {
 router.get('/fields', (req, res, next) => {
   res.locals.title = 'Панель управления / Поля - ' + res.locals.shopTitle;
   Field.find()
-  .then(fields => {
-    res.locals.fields = fields;
-    res.render('admin/fields', {
-      fieldsMenu: true,
-      csrfToken: req.csrfToken()
+    .then(fields => {
+      res.locals.fields = fields;
+      res.render('admin/fields', {
+        fieldsMenu: true,
+        csrfToken: req.csrfToken()
+      });
+    })
+    .catch(err => {
+      req.flash('errors', 'Не удалось получить доступ к полям.');
+      res.redirect('/admin');
     });
-  })
-  .catch(err => {
-    req.flash('errors', 'Не удалось получить доступ к полям.');
-    res.redirect('/admin');
-  });
 });
 
 router.post('/field/:id', (req, res, next) => {
   Field.findByIdAndUpdate(req.params.id, {
-    name: req.body.fieldName
-  })
-  .then(updRes => {
-    res.redirect('/admin/fields');
-  })
-  .catch(err => {
-    req.flash('errors', 'Не удалось обновить данные.');
-    res.redirect('/admin/fields');
-  })
+      name: req.body.fieldName
+    })
+    .then(updRes => {
+      res.redirect('/admin/fields');
+    })
+    .catch(err => {
+      req.flash('errors', 'Не удалось обновить данные.');
+      res.redirect('/admin/fields');
+    })
 })
 
 module.exports = router;

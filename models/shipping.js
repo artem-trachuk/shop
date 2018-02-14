@@ -4,6 +4,10 @@ var schemaTypes = mongoose.Schema.Types;
 var shippingSchema = new mongoose.Schema({
     name: String,
     description: String,
+    show: {
+        type: Boolean,
+        default: true
+    },
     fields: {
         type: [schemaTypes.ObjectId],
         ref: 'ShippingField'

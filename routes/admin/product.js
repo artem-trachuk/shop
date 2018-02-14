@@ -12,7 +12,6 @@ router.use(csrf());
 var Product = require('../../models/product');
 var Category = require('../../models/category');
 var Field = require('../../models/field');
-var ProductData = require('../../models/product-data');
 var Counter = require('../../models/counter');
 
 /* GET Admin product editor. */
@@ -40,42 +39,38 @@ router.post('/', upload.single('productImage'), function (req, res, next) {
         return res.redirect('/admin/product');
     }
     Counter.findOneAndUpdate({
-        $inc: {
-            product: 1
-        }
-    })
-    .then(counter => {
-        Product.create({
-            title: product.title,
-            price: product.price,
-            article: counter.product,
-            USDprice: product.USDprice,
-            description: product.description
-        })
-        .then(insertRes => {
-            if (req.file) {
-                insertRes.imagePath = '/uploads/' + req.file.filename;
+            $inc: {
+                product: 1
             }
-            insertRes.save().then(saveRes => {
-                req.flash('success', 'Продукт ' + insertRes.title + ' успешно создан. Вы можете перейти к настройке полей.');
-                res.redirect('/admin/product/' + insertRes.id);
-            });
         })
-        .catch(err => console.log(err));
-    })
+        .then(counter => {
+            Product.create({
+                    title: product.title,
+                    price: product.price,
+                    article: counter.product,
+                    USDprice: product.USDprice,
+                    description: product.description
+                })
+                .then(insertRes => {
+                    if (req.file) {
+                        insertRes.imagePath = '/uploads/' + req.file.filename;
+                    }
+                    insertRes.save().then(saveRes => {
+                        req.flash('success', 'Продукт ' + insertRes.title + ' успешно создан. Вы можете перейти к настройке полей.');
+                        res.redirect('/admin/product/' + insertRes.id);
+                    });
+                })
+                .catch(err => console.log(err));
+        })
 });
 
 /* GET Admin product editor by id. */
 router.get('/:id', function (req, res, next) {
     productId = req.params.id;
-    var errors = req.flash('errors');
-    var success = req.flash('success');
     Product.findById(productId)
         .then(doc => {
             res.render('admin/product', {
                 product: doc,
-                errors: errors,
-                success: success,
                 csrfToken: req.csrfToken()
             });
         })
@@ -107,127 +102,74 @@ router.post('/:id', upload.single('productImage'), function (req, res, next) {
 
 /* GET Admin Product Data page. */
 router.get('/:id/data', (req, res, next) => {
-    var productId = req.params.id;
-    var errors = req.flash('errors');
-    var success = req.flash('success');
-    // find all categories
     Category.find()
         .then(categories => {
-            if (categories.length > 0) {
-                // find requested product
-                Product.findById(productId)
-                    .then(product => {
-                        if (product) {
-                            // find product's categories
-                            Category.find({
-                                    _id: {
-                                        $in: product.categories
-                                    }
-                                })
-                                .then(productCategories => {
-                                    if (productCategories.length === 0) {
-                                        // render page
-                                        return res.render('admin/product-data', {
-                                            errors: errors,
-                                            success: success,
-                                            categories: categories,
-                                            product: product,
-                                            csrfToken: req.csrfToken()
-                                        });
-                                    }
-                                    var categoriesDone = 0;
-                                    var resultFields = [];
-                                    // find fields for each product's category
-                                    productCategories.forEach(productCategory => {
-                                        Field.find({
-                                                _id: {
-                                                    $in: productCategory.fields
-                                                }
-                                            })
-                                            .then(fields => {
-                                                if (fields.length > 0) {
-                                                    ProductData.find({
-                                                            fieldId: {
-                                                                $in: fields
-                                                            },
-                                                            productId: productId
-                                                        })
-                                                        .then(productData => {
-                                                            fields.forEach(field => {
-                                                                resultFields.push({
-                                                                    _id: field.id,
-                                                                    name: field.name
-                                                                })
-                                                            });
-                                                            var done = 0;
-                                                            productData.forEach(data => {
-                                                                var t = resultFields.find(f => f._id === data.fieldId.toString());
-                                                                t.fieldValue = data.fieldValue;
-                                                            });
-                                                            categoriesDone++;
-                                                            if (categoriesDone === productCategories.length) {
-                                                                // render page
-                                                                res.render('admin/product-data', {
-                                                                    errors: errors,
-                                                                    success: success,
-                                                                    categories: categories,
-                                                                    product: product,
-                                                                    productCategories: productCategories,
-                                                                    fields: resultFields,
-                                                                    csrfToken: req.csrfToken()
-                                                                });
-                                                            }
-                                                        })
-                                                        .catch(err => {
-                                                            req.flash('errors', 'Произошла ошибка');
-                                                            res.redirect('/admin/product/' + productId);
-                                                        });
-                                                } else {
-                                                    categoriesDone++;
-                                                    if (categoriesDone === productCategories.length) {
-                                                        // render page
-                                                        res.render('admin/product-data', {
-                                                            errors: errors,
-                                                            success: success,
-                                                            categories: categories,
-                                                            product: product,
-                                                            fields: resultFields,
-                                                            productCategories: productCategories,
-                                                            csrfToken: req.csrfToken()
-                                                        });
-                                                    }
-                                                }
-                                            })
-                                            .catch(err => {
-                                                req.flash('errors', 'Произошла ошибка');
-                                                res.redirect('/admin/product/' + productId);
-                                            });
-                                    });
-                                })
-                                .catch(err => {
-                                    req.flash('errors', 'Произошла ошибка');
-                                    res.redirect('/admin/product/' + productId);
-                                });
-                        } else {
-                            req.flash('errors', 'Не удалось найти продукт.');
-                            res.redirect('/admin/products/');
+            if (categories.length === 0) {
+                req.flash('errors', 'Необходимо создать хотя бы одну категорию.');
+                return res.redirect('/admin/category/');
+            }
+            res.locals.categories = categories;
+            next();
+        })
+        .catch(err => next(err));
+}, (req, res, next) => {
+    Product.findById(req.params.id)
+        .then(product => {
+            if (product) {
+                res.locals.title = product.title;
+                res.locals.product = product;
+                Category.find({
+                        _id: {
+                            $in: product.categories
                         }
                     })
-                    .catch(err => {
-                        req.flash('errors', 'Не удалось найти продукт.');
-                        res.redirect('/admin/products/');
-                    });
+                    .then(productCategories => {
+                        if (productCategories.length === 0) {
+                            return next();
+                        }
+                        res.locals.productCategories = productCategories;
+                        var categoriesDone = 0;
+                        var resultFields = [];
+                        productCategories.forEach(productCategory => {
+                            Field.find({
+                                    _id: {
+                                        $in: productCategory.fields
+                                    }
+                                })
+                                .then(fields => {
+                                    if (fields.length > 0) {
+                                        fields.forEach(field => {
+                                            const item = product.data.find(d => d.fieldId.toString() === field.id);
+                                            resultFields.push({
+                                                _id: field.id,
+                                                fieldValue: item ? item.fieldValue : "",
+                                                name: field.name
+                                            })
+                                        });
+                                    }
+                                    categoriesDone++;
+                                    if (categoriesDone === productCategories.length) {
+                                        res.locals.fields = resultFields;
+                                        next();
+                                    }
+                                })
+                                .catch(err => next(err));
+                        });
+                    })
+                    .catch(err => next(err));
             } else {
-                req.flash('errors', 'Необходимо создать хотя бы одну категорию.');
-                res.redirect('/admin/category/');
+                req.flash('errors', 'Не удалось найти продукт.');
+                res.redirect('/admin/products/');
             }
         })
-        .catch(err => {
-            req.flash('errors', 'Не удалось выполнить запрос');
-            res.redirect('/admin/product/' + productId);
-        });
+        .catch(err => next(err));
+}, (req, res, next) => {
+    res.render('admin/product-data', {
+        csrfToken: req.csrfToken()
+    });
 });
 
+// Add category to product
 router.post('/:id/add-category', (req, res, next) => {
     var productId = req.params.id;
     var formData = req.body;
@@ -262,52 +204,51 @@ router.post('/:id/add-category', (req, res, next) => {
 /* POST Admin Product data. */
 router.post('/:id/data', function (req, res, next) {
     var productId = req.params.id;
+    // fields from form
     var fields = req.body;
-    fieldsLength = Object.keys(fields).length;
+    const fieldsLength = Object.keys(fields).length;
     var done = 0;
-    for (f in fields) {
-        (function (field) {
-            if (field === '_csrf') {
-                done++;
-            } else {
-                var f = field;
-                if (fields[f].length === 0) {
-                    done++;
-                    if (done === fieldsLength) next();
-                } else {
-                    ProductData.findOneAndUpdate({
-                        productId: productId,
-                        fieldId: f
-                    }, {
-                        fieldValue: fields[f]
-                    })
-                    .then(ou => {
-                        // No data
-                        if (!ou) {
-                            ProductData.create({
-                                    productId: productId,
+    Product.findById(productId)
+        .then(product => {
+            req.product = product;
+            for (f in fields) {
+                (function (field) {
+                    if (field !== '_csrf') {
+                        var f = field;
+                        // find index of object {fieldId, fieldValue} in data
+                        const index = product.data.findIndex(d => d.fieldId.toString() === f);
+                        if (fields[f].length === 0) {
+                            product.data.splice(index, 1);
+                        } else {
+                            // field does not exist in array
+                            if (index === -1) {
+                                product.data.push({
                                     fieldId: f,
                                     fieldValue: fields[f]
-                                })
-                                .then(createResult => {
-                                    done++;
-                                    if (done === fieldsLength) next();
                                 });
-                        } else {
-                            done++;
-                            if (done === fieldsLength) next();
+                            } else {
+                                product.data[index] = {
+                                    fieldId: f,
+                                    fieldValue: fields[f]
+                                }
+                            }
                         }
-                    })
-                    .catch(err => console.log(err));
-                }
+                    }
+                    done++;
+                    if (done === fieldsLength) {
+                        next();
+                    }
+                })(f);
             }
-        })(f);
-    }
-}, renderProductDataUpdate);
-
-function renderProductDataUpdate(req, res, next) {
-    productId = req.params.id;
-    res.redirect('/admin/product/' + productId + '/data');
-}
+        })
+        .catch(err => next(err));
+}, (req, res, next) => {
+    const productId = req.params.id;
+    Product.findByIdAndUpdate(productId, req.product)
+        .then(updateResult => {
+            res.redirect('/admin/product/' + productId + '/data');
+        })
+        .catch(err => next(err));
+});
 
 module.exports = router;

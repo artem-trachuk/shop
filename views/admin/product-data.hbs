@@ -1,4 +1,3 @@
-{{> messages}}
 <div class="row">
     <div class="col-lg-6 offset-lg-3">
         <nav aria-label="breadcrumb">
@@ -19,15 +18,15 @@
 </div>
 <div class="row">
     <div class="col-md-8 offset-md-2">
-        <hr> {{> messages}}
+        <hr>
         <div class="row">
             <div class="col-md-6">
                 <h2>Поля продукта</h2>
                 <form action="/admin/product/{{product.id}}/data" method="POST">
                     {{#each fields}}
                     <div class="form-group">
-                        <label for="{{this.name}}">{{this.name}}</label>
-                        <input type="text" class="form-control" name="{{this._id}}" value="{{this.fieldValue}}">
+                        <label for="{{name}}">{{name}}</label>
+                        <input type="text" class="form-control" name="{{_id}}" value="{{fieldValue}}">
                     </div>
                     {{/each}}
                     <input type="hidden" name="_csrf" value="{{ csrfToken }}">

@@ -36,7 +36,7 @@
                     <td>
                         <strong>{{fieldName}}</strong>
                     </td>
-                    <td>{{fieldData}} </td>
+                    <td>{{fieldValue}} </td>
                 </tr>
                 {{/each}}
                 <tr>
@@ -75,8 +75,7 @@
         <div>
             <span>Сохраните ссылку для слежения за информацией о заказе:</span>
             <code>http://shop.ps.od.ua/cart/order/{{order._id}}</code>
-            <small>Информация о заказе будет доступна только из этого веб-браузера до истечения сессии.</small>
-            {{order.clientNote}}
+            <p><small>Информация о заказе будет доступна только из этого веб-браузера до истечения сессии.</small></p>
         </div>
         {{/if}}
     </div>

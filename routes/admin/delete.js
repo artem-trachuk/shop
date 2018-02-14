@@ -6,7 +6,6 @@ router.use(csrf());
 
 var Category = require('../../models/category');
 var Product = require('../../models/product');
-var ProductData = require('../../models/product-data');
 
 router.get('/category/:id', function (req, res, next) {
     const categoryId = req.params.id;
@@ -45,15 +44,10 @@ router.get('/product/:id', function (req, res, next) {
     Product.findOneAndRemove({
             _id: productId
         })
-        .then(removeRes => {
-            return ProductData.remove({
-                productId: productId
-            })
-        })
         .then(remRes => {
             res.redirect('/admin/products');
         })
-        .catch(err => console.log(err));
+        .catch(err => next(err));
 });
 
 module.exports = router;

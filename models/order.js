@@ -28,6 +28,15 @@ var orderSchema = new mongoose.Schema({
         type: schemaTypes.ObjectId,
         ref: 'Shipping'
     },
+    shippingFieldData: {
+        type: [{
+            fieldId: {
+                type: schemaTypes.ObjectId,
+                ref: 'ShippingField'
+            },
+            fieldValue: String
+        }]
+    },
     payment: {
         type: schemaTypes.ObjectId,
         ref: 'Payment'

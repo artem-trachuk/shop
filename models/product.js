@@ -1,15 +1,25 @@
 var mongoose = require('mongoose');
+var schemaTypes = mongoose.Schema.Types;
 
 var productSchema = new mongoose.Schema({
     imagePath: String,
     title: String,
     price: Number,
-    article: Number,
     USDprice: Number,
+    article: Number,
     description: String,
     categories: {
-        type: [mongoose.Schema.Types.ObjectId],
+        type: [schemaTypes.ObjectId],
         ref: 'Category'
+    },
+    data: {
+        type: [{
+            fieldId: {
+                type: schemaTypes.ObjectId,
+                ref: 'Field'
+            },
+            fieldValue: String
+        }]
     }
 });
 

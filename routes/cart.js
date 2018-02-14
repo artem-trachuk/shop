@@ -10,7 +10,6 @@ var Order = require('../models/order');
 var Payment = require('../models/payment');
 var Shipping = require('../models/shipping');
 var ShippingField = require('../models/shipping-field');
-var ShippingFieldData = require('../models/shipping-field-data');
 var User = require('../models/user');
 var Counter = require('../models/counter');
 
@@ -105,42 +104,41 @@ router.post('/checkout', (req, res, next) => {
     fieldsLength = Object.keys(fields).length;
     var done = 0;
     Counter.findOneAndUpdate({
-        $inc: {
-            order: 1
-        }
-    })
-    .then(counter => {
-        Order.create({
-            orderDate: new Date(),
-            user: req.user,
-            cart: req.cart,
-            article: counter.order,
-            shipping: shippingId,
-            payment: paymentId
-        })
-        .then(order => {
-            req.orderId = order.id;
-            for (f in fields) {
-                (function (field) {
-                    if (field === '_csrf') {
-                        done++;
-                    } else {
-                        ShippingFieldData.create({
-                                orderId: order.id,
-                                fieldId: field,
-                                fieldData: fields[f]
-                            })
-                            .then(createResult => {
-                                done++;
-                                if (done === fieldsLength) {
-                                    next();
-                                }
-                            });
-                    }
-                })(f);
+            $inc: {
+                order: 1
             }
-        });
-    })
+        })
+        .then(counter => {
+            Order.create({
+                    orderDate: new Date(),
+                    user: req.user,
+                    cart: req.cart,
+                    article: counter.order,
+                    shipping: shippingId,
+                    payment: paymentId
+                })
+                .then(order => {
+                    req.orderId = order.id;
+                    for (f in fields) {
+                        (function (field) {
+                            if (field === '_csrf') {
+                                done++;
+                            } else {
+                                order.shippingFieldData.push({
+                                    fieldId: field,
+                                    fieldValue: fields[f]
+                                });
+                                done++;
+                            }
+                            if (done === fieldsLength) {
+                                Order.findByIdAndUpdate(order.id, order)
+                                    .then(updateResul => next())
+                                    .catch(err => next(err));
+                            }
+                        })(f);
+                    }
+                });
+        })
 }, (req, res, next) => {
     if (req.user) {
         User.findByIdAndUpdate(req.user.id, {
@@ -221,34 +219,25 @@ router.get('/order/:id', (req, res, next) => {
         case 5:
             res.locals.status = 'Отказ';
             break;
-    }
-    ShippingFieldData.find({
-            orderId: req.order.id
-        })
-        .then(data => {
-            if (data.length === 0) {
-                next();
-            } else {
-                shippingData = [];
-                var done = 0;
-                data.forEach(d => {
-                    ShippingField.findById(d.fieldId)
-                        .then(field => {
-                            if (field) {
-                                shippingData.push({
-                                    fieldName: field.name,
-                                    fieldData: d.fieldData
-                                });
-                            }
-                            done++;
-                            if (done === data.length) {
-                                res.locals.shippingData = shippingData;
-                                next();
-                            }
-                        });
-                });
-            }
-        });
+    };
+    shippingData = [];
+    var done = 0;
+    req.order.shippingFieldData.forEach(d => {
+        ShippingField.findById(d.fieldId)
+            .then(field => {
+                if (field) {
+                    shippingData.push({
+                        fieldName: field.name,
+                        fieldValue: d.fieldValue
+                    });
+                }
+                done++;
+                if (done === req.order.shippingFieldData.length) {
+                    res.locals.shippingData = shippingData;
+                    next();
+                }
+            });
+    });
 }, (req, res, next) => {
     Shipping.findById(req.order.shipping)
         .then(ship => {
@@ -260,7 +249,7 @@ router.get('/order/:id', (req, res, next) => {
             next();
         })
 }, (req, res, next) => {
-    res.locals.title = 'Заказ ' + res.locals.order._id + ' - ' + res.locals.shopTitle;
+    res.locals.title = 'Заказ ' + res.locals.order.article + ' - ' + res.locals.shopTitle;
     res.render('order');
 });
 
@@ -337,22 +326,22 @@ router.get('/remove-from-cart/:id', (req, res, next) => {
             }
             Cart.remove(req.cart, product);
             if (req.user) {
-                if(req.cart.totalQty === 0) {
+                if (req.cart.totalQty === 0) {
                     User.findByIdAndUpdate(req.user.id, {
-                        $unset: {
-                            cart: ""
-                        }
-                    })
-                    .then(updResult => {
-                        next();
-                    });
+                            $unset: {
+                                cart: ""
+                            }
+                        })
+                        .then(updResult => {
+                            next();
+                        });
                 } else {
                     User.findByIdAndUpdate(req.user.id, {
-                        cart: req.cart
-                    })
-                    .then(updResult => {
-                        next();
-                    });
+                            cart: req.cart
+                        })
+                        .then(updResult => {
+                            next();
+                        });
                 }
             } else {
                 if (req.cart.totalQty === 0) {

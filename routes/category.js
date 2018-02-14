@@ -8,13 +8,12 @@ var Product = require('../models/product');
 var Config = require('../models/config');
 var Category = require('../models/category');
 var Field = require('../models/field');
-var ProductData = require('../models/product-data');
 
 var buildCategories = require('./helpers/buildCategories');
 
 router.get('/:id', buildCategories, (req, res, next) => { // find all products in a category
     var categoryId = req.params.id;
-    res.locals.categoryId = categoryId;
+    res.locals.categoryId = req.params.id;
     var fields = res.locals.query = req.query;
     const fieldsLength = Object.keys(fields).length;
     // find products with filters
@@ -26,13 +25,13 @@ router.get('/:id', buildCategories, (req, res, next) => { // find all products i
                 if (field === '_csrf') {
                     done++;
                 } else {
-                    ProductData.find({
-                            fieldId: field,
-                            fieldValue: fields[f]
+                    Product.find({
+                            "data.fieldId": field,
+                            "data.fieldValue": fields[f]
                         })
-                        .then(data => {
-                            data.forEach(d => {
-                                products.push(d.productId);
+                        .then(p => {
+                            p.forEach(d => {
+                                products.push(d.id);
                             });
                             done++;
                             if (done === fieldsLength) {
@@ -54,6 +53,7 @@ router.get('/:id', buildCategories, (req, res, next) => { // find all products i
             })(f);
         }
     } else {
+        // find all products in category
         Product.find({
                 categories: {
                     $all: req.params.id
@@ -69,17 +69,17 @@ router.get('/:id', buildCategories, (req, res, next) => { // find all products i
     }
 }, (req, res, next) => {
     Product.find({
-        categories: {
-            $all: req.params.id
-        }
-    })
-    .then(products => {
-        res.locals.allProducts = products;
-        next();
-    })
-    .catch(err => {
-        next();
-    });
+            categories: {
+                $all: req.params.id
+            }
+        })
+        .then(products => {
+            res.locals.allProducts = products;
+            next();
+        })
+        .catch(err => {
+            next();
+        });
 }, (req, res, next) => { // find fields for filters
     var allFields = [];
     // recursive
@@ -92,7 +92,7 @@ router.get('/:id', buildCategories, (req, res, next) => { // find all products i
                     category.fields.forEach(field => {
                         allFields.push(field);
                     });
-                    // find parenе category's fields
+                    // find parent category's fields
                     findFields(category.parentCategoryId);
                 } else {
                     // push to array curent category's fields
@@ -101,54 +101,60 @@ router.get('/:id', buildCategories, (req, res, next) => { // find all products i
                     });
                     // find all fields for category and parent categories
                     Field.find({
-                        _id: {
-                            $in: allFields
-                        }
-                    }).then(fields => {
-                        if (fields.length === 0) {
-                            return next();
-                        }
-                        for (var i = 0; i < fields.length; i++) {
-                            (function (index) {
-                                // get unique data values
-                                ProductData.find({
-                                        productId: {
-                                            $in: res.locals.allProducts
-                                        },
-                                        fieldId: fields[index].id
-                                    })
-                                    .then(data => {
-                                        fields[index].data = data.filter((value, index, self) => index === self.findIndex((t) => (
-                                            t.fieldValue === value.fieldValue
-                                        )));
-                                        if (index === fields.length - 1) {
-                                            res.locals.fields = fields;
-                                            next();
-                                        }
-                                    })
-                                    .catch(err => {
-                                        //
+                            _id: {
+                                $in: allFields
+                            }
+                        }).then(fields => {
+                            if (fields.length === 0) {
+                                return next();
+                            }
+                            const products = res.locals.allProducts;
+                            var fieldsForView = [];
+                            for (var i = 0; i < fields.length; i++) {
+                                (function (index) {
+                                    var values = [];
+                                    products.forEach(product => {
+                                        product.data.forEach(data => {
+                                            if (data.fieldId.toString() === fields[index].id) {
+                                                values.push({
+                                                    fieldValue: data.fieldValue,
+                                                    fieldId: fields[index].id
+                                                });
+                                            }
+                                        });
                                     });
-                            })(i);
-                        };
-                    })
-                    .catch(err => {
-                        //
-                    });
+                                    if (values.length > 0) {
+                                        fieldsForView.push({
+                                            data: values
+                                        });
+                                    }
+                                    // fields[index].data = values;
+                                    if (index === fields.length - 1) {
+                                        if (fieldsForView.length > 0) {
+                                            res.locals.fields = fieldsForView;
+                                        }
+                                        next();
+                                    }
+                                })(i);
+                            };
+                        })
+                        .catch(err => {
+                            //
+                        });
                 }
             });
     }
     findFields(req.params.id);
 }, (req, res, next) => { // render page
     Category.findById(req.params.id)
-    .then(category => {
-        res.locals.title = category.name + ' - ' + res.locals.shopTitle;
-        res.render('category');
-    })
-    .catch(err => {
-        req.flash('errors', 'Не удалось выполнить запрос.');
-        res.redirect('/');
-    });
+        .then(category => {
+            res.locals.title = category.name + ' - ' + res.locals.shopTitle;
+            res.render('category');
+        })
+        .catch(err => {
+            req.flash('errors', 'Не удалось выполнить запрос.');
+            res.redirect('/');
+        });
 });
 
 module.exports = router;

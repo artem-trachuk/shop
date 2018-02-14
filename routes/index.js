@@ -9,7 +9,6 @@ var Product = require('../models/product');
 var Config = require('../models/config');
 var Order = require('../models/order');
 var Category = require('../models/category');
-var ProductData = require('../models/product-data');
 var Field = require('../models/field');
 var User = require('../models/user');
 
@@ -64,30 +63,27 @@ router.get('/product/:id', (req, res, next) => {
   var productId = req.params.id;
   Product.findById(productId)
     .then(product => {
-      ProductData.find({
-          productId: productId
-        })
-        .then(data => {
-          var done = 0;
-          var dataArray = [];
-          data.forEach(dataElement => {
-            Field.findById(dataElement.fieldId)
-              .then(f => {
-                done++;
-                dataArray.push({
-                  name: f.name,
-                  value: dataElement.fieldValue
-                });
-                if (done === data.length) {
-                  res.render('product', {
-                    product: product,
-                    fields: dataArray
-                  });
-                }
-              });
-          });
-        });
+      res.locals.product = product;
+      var done = 0;
+      var dataArray = [];
+      product.data.forEach(data => {
+        Field.findById(data.fieldId)
+          .then(field => {
+            done++;
+            dataArray.push({
+              name: field.name,
+              value: data.fieldValue
+            });
+            if (done == product.data.length) {
+              res.locals.fields = dataArray;
+              next();
+            }
+          })
+          .catch(err => next(err));
+      })
     });
+}, (req, res, next) => {
+  res.render('product');
 });
 
 router.get('/fb-login', passport.authenticate('fb-signin'));
@@ -97,14 +93,14 @@ router.get('/fb-callback', passport.authenticate('fb-signin', {
 }), (req, res, next) => {
   if (req.session.cart) {
     User.findByIdAndUpdate(req.user.id, {
-      cart: req.session.cart,
-    }).then(updateResult => {
-      req.session.cart = null;
-      next();
-    })
-    .catch(err => {
-      next();
-    });
+        cart: req.session.cart,
+      }).then(updateResult => {
+        req.session.cart = null;
+        next();
+      })
+      .catch(err => {
+        next();
+      });
   } else {
     next();
   }
