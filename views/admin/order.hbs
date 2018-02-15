@@ -91,7 +91,7 @@
                 <tr>
                     <td>{{product.title}}</td>
                     <td>{{qty}}</td>
-                    <td>{{price}}</td>
+                    <td>{{price}} грн.</td>
                     <td>
                         <form class="form-inline" action="/admin/guarantees" method="POST">
                             <div class="form-group">
@@ -114,7 +114,6 @@
             <thead>
                 <th scope="col">Товар</th>
                 <th scope="col">Серийный номер</th>
-                <th scope="col"></th>
             </thead>
             <tbody>
                 {{#each guarantees}}
@@ -122,11 +121,14 @@
                     <td>
                         <a href="/product/{{this.product}}" class="text-dark font-weight-bold">{{productTitle}}</a>
                     </td>
-                    <td>{{serial}}</td>
                     <td>
-                        <a href="/" class="text-info">
-                            <i class="fas fa-edit"></i>
-                        </a>
+                        <form action="/admin/order/{{../order.id}}/guarantee/{{id}}" method="POST" class="form-inline">
+                            <div class="form-group mr-2">
+                                <input type="text" value="{{serial}}" class="form-control" name="serial">
+                            </div>
+                            <input type="hidden" name="_csrf" value="{{ ../csrfToken }}">
+                            <button type="submit" class="btn btn-primary btn-sm">Изменить</button>
+                        </form>
                     </td>
                 </tr>
                 {{/each}}

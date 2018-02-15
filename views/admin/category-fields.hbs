@@ -39,8 +39,8 @@
         <div class="row mt-3">
             <div class="col-12">
                 {{#each fields}}
-                <span class="badge badge-secondary">{{this}}
-                    <i class="far fa-dot-circle"></i>
+                <span class="badge badge-light">{{name}}
+                    <a href="/admin/category/{{../category._id}}/delete-field/{{id}}" class="text-danger"><i class="fas fa-minus-circle"></i></a>
                 </span> {{/each}}
             </div>
         </div>

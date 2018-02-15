@@ -215,6 +215,30 @@ router.post('/field/:id', (req, res, next) => {
       req.flash('errors', 'Не удалось обновить данные.');
       res.redirect('/admin/fields');
     })
+});
+
+router.get('/guarantees', (req, res, next) => {
+  Guarantee.find()
+    .then(guarantees => {
+      res.locals.guarantees = guarantees;
+      next();
+    })
+    .catch(err => next(err));
+
+}, (req, res, next) => {
+  res.render('admin/guarantees', {
+    guaranteesMenu: true
+  });
+});
+
+router.post('/order/:orderId/guarantee/:guaranteeId', (req, res, next) => {
+  Guarantee.findByIdAndUpdate(req.params.guaranteeId, {
+      serial: req.body.serial
+    })
+    .then(updateResult => {
+      res.redirect('/admin/order/' + req.params.orderId);
+    })
+    .catch(err => next(err));
 })
 
 module.exports = router;

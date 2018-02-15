@@ -181,12 +181,17 @@ router.post('/:id/add-category', (req, res, next) => {
                     Category.findById(categorId)
                         .then(category => {
                             if (category) {
-                                product.categories.push(category.id);
-                                if (category.parentCategoryId) {
-                                    addCategory(category.parentCategoryId);
+                                if (product.categories.find(c => c.toString() === category.id) === undefined) {
+                                    product.categories.push(category.id);
+                                    if (category.parentCategoryId) {
+                                        addCategory(category.parentCategoryId);
+                                    } else {
+                                        product.save()
+                                            .then(save => next());
+                                    }
                                 } else {
                                     product.save()
-                                        .then(save => res.redirect('/admin/product/' + productId + '/data'));
+                                        .then(save => next());
                                 }
                             }
                         });
@@ -199,7 +204,21 @@ router.post('/:id/add-category', (req, res, next) => {
             req.flash('errors', 'Не удалось выполнить запрос.');
             res.redirect('/admin/product/' + productId + '/data');
         });
+}, (req, res, next) => {
+    res.redirect('/admin/product/' + req.params.id + '/data')
 });
+
+router.get('/:id/delete-category/:categoryId', (req, res, next) => {
+    Product.findByIdAndUpdate(req.params.id, {
+            $pull: {
+                categories: req.params.categoryId
+            }
+        })
+        .then(updateResult => {
+            res.redirect('/admin/product/' + req.params.id + '/data');
+        })
+        .catch(err => next(err));
+})
 
 /* POST Admin Product data. */
 router.post('/:id/data', function (req, res, next) {

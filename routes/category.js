@@ -125,6 +125,7 @@ router.get('/:id', buildCategories, (req, res, next) => { // find all products i
                                     });
                                     if (values.length > 0) {
                                         fieldsForView.push({
+                                            name: fields[index].name,
                                             data: values
                                         });
                                     }

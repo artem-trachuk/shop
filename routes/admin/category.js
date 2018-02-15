@@ -57,22 +57,22 @@ router.get('/:id', function (req, res, next) {
     Category.findById(categoryId)
         .then(c => {
             Category.find({
-                _id: {
-                    $ne: c._id
-                }
-            })
-            .then(categories => {
-                var selectedValue;
-                if (c.parentCategoryId) {
-                    selectedValue = c.parentCategoryId.toString();
-                }
-                res.render('admin/category', {
-                    category: c,
-                    categories: categories,
-                    selectedValue: selectedValue,
-                    csrfToken: req.csrfToken()
+                    _id: {
+                        $ne: c._id
+                    }
+                })
+                .then(categories => {
+                    var selectedValue;
+                    if (c.parentCategoryId) {
+                        selectedValue = c.parentCategoryId.toString();
+                    }
+                    res.render('admin/category', {
+                        category: c,
+                        categories: categories,
+                        selectedValue: selectedValue,
+                        csrfToken: req.csrfToken()
+                    });
                 });
-            });
         })
         .catch(err => {
             req.flash('errors', 'В данный момент запрос не может быть выполнен.');
@@ -85,9 +85,9 @@ router.post('/:id', function (req, res, next) {
     category = req.body;
     categoryId = req.params.id;
     Category.findByIdAndUpdate(categoryId, {
-        name: category.name,
-        parentCategoryId: category.parentCategory
-    })
+            name: category.name,
+            parentCategoryId: category.parentCategory
+        })
         .then(updateResult => {
             req.flash('success', 'Информация о категории обновлена.');
             res.redirect('/admin/category/' + updateResult._id);
@@ -101,46 +101,37 @@ router.post('/:id', function (req, res, next) {
 /* GET Admin Category Fields. */
 router.get('/:id/fields/', (req, res, next) => {
     Field.find()
-    .then(fields => {
-        res.locals.allFields = fields;
-        next();
-    })
-    .catch(err => {
-        next();
-    });
-}, function (req, res, next) {
+        .then(fields => {
+            res.locals.allFields = fields;
+            next();
+        })
+        .catch(err => next(err));
+}, (req, res, next) => {
     var categoryId = req.params.id;
     // Find category
     Category.findById(categoryId)
-        .then(c => {
-            if (c.fields.length > 0) {
-                var fields = [];
-                var done = 0;
-                // Find field names
-                c.fields.forEach(field => {
-                    Field.findOne({
-                            _id: field
-                        })
-                        .then(f => {
-                            fields.push(f.name);
-                            done++;
-                            if (done === c.fields.length) {
-                                res.render('admin/category-fields', {
-                                    category: c,
-                                    fields: fields,
-                                    csrfToken: req.csrfToken()
-                                });
-                            }
-                        });
-                });
-            } else {
-                res.render('admin/category-fields', {
-                    category: c,
-                    csrfToken: req.csrfToken()
-                });
-            }
+        .then(category => {
+            res.locals.title = 'Панель управления / Категории / ' + category.name + ' / Поля категории - ' + res.locals.shopTitle;
+            res.locals.category = category;
+            if (category.fields.length > 0) {
+                res.locals.fields = res.locals.allFields.filter(
+                    allF => category.fields.find(catF => {
+                        return catF.toString() === allF.id;
+                    }) !== undefined
+                );
+                res.locals.allFields = res.locals.allFields.filter(
+                    allF => category.fields.find(catF => {
+                        return catF.toString() === allF.id;
+                    }) === undefined
+                );
+            };
+            next();
         })
-        .catch(err => console.log(err));
+        .catch(err => next(err));
+}, (req, res, next) => {
+    res.render('admin/category-fields', {
+        csrfToken: req.csrfToken()
+    });
 });
 
 /* POST Admin Category Field. */
@@ -160,9 +151,10 @@ router.post('/:id/field', function (req, res, next) {
                     .then(createResult => {
                         saveFieldInCategory(createResult._id);
                     });
+            } else {
+                // Field found
+                saveFieldInCategory(findResult._id);
             }
-            // Field found
-            saveFieldInCategory(findResult._id);
         })
         .catch(err => console.log(err));
     var saveFieldInCategory = function (fieldId) {
@@ -170,13 +162,18 @@ router.post('/:id/field', function (req, res, next) {
         Category.findById(categoryId)
             .then(c => {
                 // Add field to category
-                c.fields.push(fieldId);
-                c.save()
-                    .then(save => {
-                        return res.redirect('/admin/category/' + categoryId + '/fields');
-                    });
+                if (c.fields.find(f => f.toString() === fieldId.toString()) === undefined) {
+                    c.fields.push(fieldId);
+                    c.save()
+                        .then(save => {
+                            return next();
+                        });
+                }
+                next();
             });
     }
+}, (req, res, next) => {
+    res.redirect('/admin/category/' + req.params.id + '/fields');
 });
 
 router.get('/:categoryId/add-field/:fieldId', (req, res, next) => {
@@ -186,7 +183,17 @@ router.get('/:categoryId/add-field/:fieldId', (req, res, next) => {
         }
     }).then(updRes => {
         res.redirect('/admin/category/' + req.params.categoryId + '/fields');
-    })
+    });
+});
+
+router.get('/:categoryId/delete-field/:fieldId', (req, res, next) => {
+    Category.findByIdAndUpdate(req.params.categoryId, {
+        $pull: {
+            fields: req.params.fieldId
+        }
+    }).then(updRes => {
+        res.redirect('/admin/category/' + req.params.categoryId + '/fields');
+    });
 });
 
 module.exports = router;
