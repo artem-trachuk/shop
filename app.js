@@ -207,9 +207,4 @@ Counter.findOne()
   }
 });
 
-// Add admin
-// Almighty.create({
-//   user: "5a7440997f4acb4051de1746"
-// });
-
 module.exports = app;

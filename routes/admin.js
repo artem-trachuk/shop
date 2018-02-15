@@ -30,7 +30,6 @@ router.use((req, res, next) => {
     req.flash('errors', 'У вас нет прав для доступа к панели управления.');
     res.redirect('/');
   }
-  next();
 });
 
 /* GET Admin page. */
