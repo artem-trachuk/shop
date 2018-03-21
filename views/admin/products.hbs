@@ -15,8 +15,8 @@
                     <thead>
                         <tr>
                             <th scope="col">Название</th>
-                            <th scope="col">USD</th>
                             <th scope="col">UAH</th>
+                            <th scope="col">USD</th>
                             <th scope="col">Код товара</th>
                             <th scope="col"></th>
                         </tr>
@@ -25,8 +25,8 @@
                         {{#each products}}
                         <tr>
                             <td>{{this.title}}</td>
-                            <td>{{this.USDprice}}</td>
-                            <td>{{this.price}}</td>
+                            <td>{{this.price}} грн.</td>
+                            <td>${{this.USDprice}}</td>
                             <td>{{article}}</td>
                             <td>
                                 <a href="/admin/product/{{this._id}}" class="text-info">

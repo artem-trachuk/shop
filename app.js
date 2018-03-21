@@ -18,6 +18,7 @@ var Config = require('./models/config');
 var User = require('./models/user');
 var Almighty = require('./models/almighty');
 var Counter = require('./models/counter');
+var Review = require('./models/review');
 
 var index = require('./routes/index');
 var category = require('./routes/category');
@@ -28,6 +29,7 @@ var product = require('./routes/admin/product');
 var adminCategory = require('./routes/admin/category');
 var shippingAndPayment = require('./routes/admin/shipping-and-payment');
 var deleteData = require('./routes/admin/delete');
+var infotechParser = require('./routes/admin/parser');
 
 mongoose.connect(shopConfig.mongodburl)
   .catch(err => console.log(err));
@@ -161,11 +163,20 @@ app.use('/', index);
 app.use('/category', category);
 app.use('/cart', cart);
 app.use('/user', user);
+app.use('/admin', (req, res, next) => {
+  Review.count({checked: false})
+  .then(counter => {
+    res.locals.reviewsCounter = counter;
+    next();
+  })
+  .catch(err => next(err));
+})
 app.use('/admin', admin);
 app.use('/admin/product', product);
 app.use('/admin/category', adminCategory);
 app.use('/admin/shipping-and-payment', shippingAndPayment);
 app.use('/admin/delete', deleteData);
+app.use('/admin/parser', infotechParser)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

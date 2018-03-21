@@ -87,13 +87,13 @@ router.get('/:id', buildCategories, (req, res, next) => { // find all products i
         Category.findById(categoryId)
             .then(category => {
                 // has parent category
-                if (category.parentCategoryId) {
+                if (category.parentCategory) {
                     // push to array curent category's fields
                     category.fields.forEach(field => {
                         allFields.push(field);
                     });
                     // find parent category's fields
-                    findFields(category.parentCategoryId);
+                    findFields(category.parentCategory);
                 } else {
                     // push to array curent category's fields
                     category.fields.forEach(field => {
@@ -125,6 +125,7 @@ router.get('/:id', buildCategories, (req, res, next) => { // find all products i
                                     });
                                     if (values.length > 0) {
                                         fieldsForView.push({
+                                            id: fields[index].id,
                                             name: fields[index].name,
                                             data: values
                                         });

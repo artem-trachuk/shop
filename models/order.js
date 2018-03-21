@@ -3,6 +3,7 @@ var schemaTypes = mongoose.Schema.Types;
 
 /*
     Status codes:
+    0 - new
     1 - pending
     2 - in a depot
     3 - sent to a buyer
@@ -11,7 +12,7 @@ var schemaTypes = mongoose.Schema.Types;
 */
 var orderSchema = new mongoose.Schema({
     cart: Object,
-    status: { type: Number, default: 1 },
+    status: { type: Number, default: 0 },
     user: {
         type: schemaTypes.ObjectId,
         ref: 'User'

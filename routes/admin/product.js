@@ -70,6 +70,7 @@ router.get('/:id', function (req, res, next) {
     Product.findById(productId)
         .then(doc => {
             res.render('admin/product', {
+                title: 'Панель управления' + ' / Продукты / ' + doc.title + ' - ' + res.locals.shopTitle,
                 product: doc,
                 csrfToken: req.csrfToken()
             });
@@ -92,6 +93,10 @@ router.post('/:id', upload.single('productImage'), function (req, res, next) {
             doc.USDprice = product.USDprice;
             doc.description = product.description;
             if (req.file) {
+                if (doc.imagePath) {
+                    imagePath = doc.imagePath.replace('/uploads/', '');
+                    require('fs').unlink(conf.dest + imagePath);
+                }
                 doc.imagePath = '/uploads/' + req.file.filename;
             }
             doc.save()
@@ -116,7 +121,7 @@ router.get('/:id/data', (req, res, next) => {
     Product.findById(req.params.id)
         .then(product => {
             if (product) {
-                res.locals.title = product.title;
+                res.locals.title = 'Панель управления / Продукты / ' + product.title + ' / Данные - ' + res.locals.shopTitle;
                 res.locals.product = product;
                 Category.find({
                         _id: {
@@ -139,17 +144,31 @@ router.get('/:id/data', (req, res, next) => {
                                 .then(fields => {
                                     if (fields.length > 0) {
                                         fields.forEach(field => {
-                                            const item = product.data.find(d => d.fieldId.toString() === field.id);
-                                            resultFields.push({
-                                                _id: field.id,
-                                                fieldValue: item ? item.fieldValue : "",
-                                                name: field.name
-                                            })
+                                            if (resultFields.length === 0 || resultFields.find(f => f._id === field.id) === undefined) {
+                                                const item = product.data.find(d => d.field.toString() === field.id);
+                                                resultFields.push({
+                                                    _id: field.id,
+                                                    fieldValue: item ? item.fieldValue : "",
+                                                    name: field.name
+                                                });
+                                            }
                                         });
                                     }
                                     categoriesDone++;
                                     if (categoriesDone === productCategories.length) {
-                                        res.locals.fields = resultFields;
+                                        res.locals.fields = resultFields.sort(function(a, b) {
+                                            var nameA = a.name.toUpperCase(); // ignore upper and lowercase
+                                            var nameB = b.name.toUpperCase(); // ignore upper and lowercase
+                                            if (nameA < nameB) {
+                                              return -1;
+                                            }
+                                            if (nameA > nameB) {
+                                              return 1;
+                                            }
+                                          
+                                            // names must be equal
+                                            return 0;
+                                          });
                                         next();
                                     }
                                 })
@@ -183,8 +202,8 @@ router.post('/:id/add-category', (req, res, next) => {
                             if (category) {
                                 if (product.categories.find(c => c.toString() === category.id) === undefined) {
                                     product.categories.push(category.id);
-                                    if (category.parentCategoryId) {
-                                        addCategory(category.parentCategoryId);
+                                    if (category.parentCategory) {
+                                        addCategory(category.parentCategory);
                                     } else {
                                         product.save()
                                             .then(save => next());
@@ -209,9 +228,21 @@ router.post('/:id/add-category', (req, res, next) => {
 });
 
 router.get('/:id/delete-category/:categoryId', (req, res, next) => {
+    Category.findById(req.params.categoryId)
+        .then(category => {
+            res.fields = category.fields;
+            next();
+        })
+        .catch(err => next(err));
+}, (req, res, next) => {
     Product.findByIdAndUpdate(req.params.id, {
             $pull: {
-                categories: req.params.categoryId
+                categories: req.params.categoryId,
+                data: {
+                    field: {
+                        $in: res.fields
+                    }
+                }
             }
         })
         .then(updateResult => {
@@ -234,20 +265,20 @@ router.post('/:id/data', function (req, res, next) {
                 (function (field) {
                     if (field !== '_csrf') {
                         var f = field;
-                        // find index of object {fieldId, fieldValue} in data
-                        const index = product.data.findIndex(d => d.fieldId.toString() === f);
+                        // find index of object {field, fieldValue} in data
+                        const index = product.data.findIndex(d => d.field.toString() === f);
                         if (fields[f].length === 0) {
                             product.data.splice(index, 1);
                         } else {
                             // field does not exist in array
                             if (index === -1) {
                                 product.data.push({
-                                    fieldId: f,
+                                    field: f,
                                     fieldValue: fields[f]
                                 });
                             } else {
                                 product.data[index] = {
-                                    fieldId: f,
+                                    field: f,
                                     fieldValue: fields[f]
                                 }
                             }

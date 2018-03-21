@@ -34,7 +34,7 @@ router.post('/', function (req, res, next) {
             if (!oneCategory) {
                 Category.create(new Category({
                         name: category.name,
-                        parentCategoryId: category.parentCategory
+                        parentCategory: category.parentCategory
                     }))
                     .then(createResult => {
                         req.flash('success', 'Категория создана.');
@@ -63,8 +63,8 @@ router.get('/:id', function (req, res, next) {
                 })
                 .then(categories => {
                     var selectedValue;
-                    if (c.parentCategoryId) {
-                        selectedValue = c.parentCategoryId.toString();
+                    if (c.parentCategory) {
+                        selectedValue = c.parentCategory.toString();
                     }
                     res.render('admin/category', {
                         category: c,
@@ -86,7 +86,7 @@ router.post('/:id', function (req, res, next) {
     categoryId = req.params.id;
     Category.findByIdAndUpdate(categoryId, {
             name: category.name,
-            parentCategoryId: category.parentCategory
+            parentCategory: category.parentCategory
         })
         .then(updateResult => {
             req.flash('success', 'Информация о категории обновлена.');

@@ -7,7 +7,7 @@ var categorySchema = new mongoose.Schema({
         type: [schemaTypes.ObjectId],
         ref: 'Field'
     },
-    parentCategoryId: {
+    parentCategory: {
         type: schemaTypes.ObjectId,
         ref: 'Category'
     }

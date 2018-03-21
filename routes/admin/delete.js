@@ -22,10 +22,10 @@ router.get('/category/:id', function (req, res, next) {
             .then(remRes => {
                 req.flash('success', 'Категория удалена.');
                 return Category.update({
-                    parentCategoryId: categoryId
+                    parentCategory: categoryId
                 }, {
                     $unset: {
-                        parentCategoryId: ""
+                        parentCategory: ""
                     }
                 });
             })

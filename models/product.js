@@ -14,7 +14,7 @@ var productSchema = new mongoose.Schema({
     },
     data: {
         type: [{
-            fieldId: {
+            field: {
                 type: schemaTypes.ObjectId,
                 ref: 'Field'
             },

@@ -59,12 +59,13 @@
             </div>
             <div class="form-group">
                 <label for="name">Родительская категория</label>
-                <select class="form-control" id="parentCategory" name="parentCategory" {{#if category.parentCategoryId}}disabled{{/if}}>
+                <select class="form-control" id="parentCategory" name="parentCategory" {{#if category.parentCategory}}disabled{{/if}}>
                     <option disabled selected>Выберите категорию</option>
                     {{#each categories}}
                     <option value={{id}} {{optionHelper ../selectedValue id}}>{{name}}</option>
                     {{/each}}
                 </select>
+                <small><span class="font-weight-bold">Внимание!</span> Родительскую категорию после выбора и сохранения невозможно сменить.</small>
             </div>
             <input type="hidden" name="_csrf" value="{{ csrfToken }}">
             <div class="clearfix">

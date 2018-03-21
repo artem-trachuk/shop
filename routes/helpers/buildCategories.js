@@ -6,7 +6,7 @@ module.exports = function buildCategories(req, res, next) {
     var findCategoriesRecursive = function (categories, categoriesCount, cb) {
         categories.forEach(category => {
             Category.find({
-                    parentCategoryId: category.id
+                    parentCategory: category.id
                 })
                 .then(categoriesByParent => {
                     if (categoriesByParent.length !== 0) {
@@ -30,7 +30,7 @@ module.exports = function buildCategories(req, res, next) {
                 return next();
             }
             Category.find({
-                    parentCategoryId: {
+                    parentCategory: {
                         $exists: false
                     }
                 })

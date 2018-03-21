@@ -1,16 +1,17 @@
-{{> messages}} {{> search}}
+{{> search}}
 <div class="row">
   <div class="col-12 col-lg-3">
     {{> categories}}
   </div>
   <div class="col-md-6">
-    <div class="card">
-      {{!--
-      <img class="card-img-top" src="{{product.imagePath}}" alt="{{this.title}}"> --}}
+    <div class="">
+      {{#if product.imagePath}}
+        <img class="float-right" style="max-height: 50vh;" src="{{product.imagePath}}" alt="{{product.title}}">
+      {{/if}}
       <div class="card-body">
         <h4 class="card-title">{{product.title}}</h4>
+        <p class="card-text text-info">Код товара: {{product.article}}</p>
         <p class="card-text">{{product.description}}</p>
-        <p class="card-text">Код товара: {{product.article}}</p>
         <table class="table">
           <tbody>
             {{#each fields}}
@@ -22,7 +23,7 @@
           </tbody>
         </table>
         <div class="clearfix">
-          <h4>{{product.price}} грн.{{#if product.USDprice}}<span class="text-secondary"> (${{product.USDprice}})</span>{{/if}}</h4>
+          <h4 class="d-inline">{{product.price}} грн.{{#if product.USDprice}}<span class="text-secondary"> (${{product.USDprice}})</span>{{/if}}</h4>
           <a href="/cart/add-to-cart/{{product._id}}" class="btn btn-success float-right">Добавить в корзину</a>
         </div>
       </div>

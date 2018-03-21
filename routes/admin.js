@@ -12,20 +12,21 @@ var ShippingField = require('../models/shipping-field');
 var Guarantee = require('../models/guarantee');
 var Field = require('../models/field');
 var Almighty = require('../models/almighty');
+var Review = require('../models/review');
 
 router.use((req, res, next) => {
   if (req.user) {
     Almighty.findOne({
-      user: req.user.id
-    })
-    .then(almightyUser => {
-      if (almightyUser) {
-        next();
-      } else {
-        req.flash('errors', 'У вас нет прав для доступа к панели управления.');
-        res.redirect('/');
-      }
-    });
+        user: req.user.id
+      })
+      .then(almightyUser => {
+        if (almightyUser) {
+          next();
+        } else {
+          req.flash('errors', 'У вас нет прав для доступа к панели управления.');
+          res.redirect('/');
+        }
+      });
   } else {
     req.flash('errors', 'У вас нет прав для доступа к панели управления.');
     res.redirect('/');
@@ -238,6 +239,34 @@ router.post('/order/:orderId/guarantee/:guaranteeId', (req, res, next) => {
       res.redirect('/admin/order/' + req.params.orderId);
     })
     .catch(err => next(err));
-})
+});
+
+router.get('/home', (req, res, next) => {
+  res.locals.title = 'Панель управления / Состояние - ' + res.locals.shopTitle;
+  res.render('admin/home', {
+    homeMenu: true
+  });
+});
+
+router.get('/reviews', (req, res, next) => {
+  Review.update({
+      checked: false
+    }, {
+      checked: true
+    })
+    .then(updateResult => {
+      Review.find().populate('user').sort({
+          _id: -1
+        })
+        .then(reviews => {
+          req.user.reviewsLastVisit = Date.now();
+          res.locals.title = 'Панель управления / Отзывы - ' + res.locals.shopTitle;
+          res.locals.reviews = reviews;
+          res.locals.reviewsMenu = true;
+          res.render('admin/reviews');
+        })
+        .catch(err => next(err));
+    }).catch(err => next(err));
+});
 
 module.exports = router;

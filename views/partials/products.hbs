@@ -2,7 +2,7 @@
     {{#each products}}
     <div class="col-12 col-lg-4 px-lg-3 mb-lg-5 d-flex flex-column">
         <div class="row" style="flex-grow: 1;">
-            <div class="col-7">
+            <div class="col-11">
                 <div class="row">
                     <div class="col">
                         <a href="/product/{{_id}}" class="text-white">
@@ -11,27 +11,46 @@
                     </div>
                     <div class="w-100"></div>
                     <div class="col">
+                        {{#if imagePath}}
+                        <img class="w-50 float-right" src="{{imagePath}}" alt="{{title}}"> {{/if}}
                         <small>{{description}}</small>
                     </div>
                 </div>
             </div>
-            <div class="col-5">
-                <img class="w-100" src="{{imagePath}}" alt="{{title}}">
-            </div>
         </div>
         <div class="row">
-            <div class="col-10 text-right">
-                <h4>{{price}} грн.{{#if USDprice}}
-                    <span class="text-secondary"> (${{USDprice}})</span>{{/if}}</h4>
+            <div class="col-9 text-right">
+                <h5>{{price}} грн.{{#if USDprice}}
+                    <span class="text-secondary"> (${{USDprice}})</span>{{/if}}</h5>
             </div>
             <div class="col-2">
+                {{#if price}}
                 <a href="/cart/add-to-cart/{{_id}}" class="text-success">
-                    <h4>
+                    <h5>
                         <i class="fas fa-cart-arrow-down"></i>
-                    </h4>
+                    </h5>
                 </a>
+                {{else}}
+                <h5 class="text-secondary">
+                    <i class="fas fa-cart-arrow-down"></i>
+                </h5>
+                {{/if}}
             </div>
         </div>
     </div>
     {{/each}}
+</div>
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-end">
+                <li class="page-item {{#if prevPageDisabled}}disabled{{/if}}">
+                    <a class="page-link" href="/?page={{prevPageIndex}}">Предыдущие</a>
+                </li>
+                <li class="page-item {{#if nextPageDisabled}}disabled{{/if}}">
+                    <a class="page-link" href="/?page={{nextPageIndex}}">Следующие</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
 </div>

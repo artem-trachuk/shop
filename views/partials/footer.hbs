@@ -2,6 +2,35 @@
   <div class="row">
     <div class="col-12 col-lg-4">
       <div class="row">
+        {{#if profile}}
+        <div class="col-12">
+          <a class="my-0 text-warning" style="cursor: pointer;" data-toggle="modal" data-target="#reviewModal">
+            <h5 class="d-inline">Оставить отзыв
+              <i class="fas fa-comment"></i>
+            </h5>
+          </a>
+
+          <!-- Modal -->
+          <div class="modal fade" id="reviewModal" tabindex="-1" role="dialog" aria-labelledby="reviewModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title text-dark" id="reviewModalLabel">Ваш отзыв</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <textarea class="w-100" name="" id="reviewTextarea" cols="30" rows="10"></textarea>
+                </div>
+                <div class="modal-footer">
+                  <button id="sendReview" type="button" data-dismiss="modal" class="btn btn-warning">Отправить</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {{/if}}
         <div class="col-12">
           {{shopTitle}} - {{shopDescription}}
         </div>
@@ -14,7 +43,22 @@
     </div>
     <div class="col-12 col-lg-2 offset-lg-6">
       <a class="float-right text-light" href="/admin">
-        <i class="fas fa-cogs"></i></a>
+        <i class="fas fa-cogs"></i>
+      </a>
     </div>
   </div>
 </div>
+<script>
+  $(function () {
+    $('#sendReview').click(function (e) {
+      $.ajax({
+        url: '/review',
+        type: 'POST',
+        data: {
+          review: $('#reviewTextarea').val()
+        },
+        success: () => { $('#reviewTextarea').val(''); }
+      });
+    });
+  });
+</script>
