@@ -318,38 +318,33 @@ router.get('/remove-from-cart/:id', (req, res, next) => {
         next();
     }
 }, (req, res, next) => {
-    Product.findById(req.params.id)
-        .then(product => {
-            if (!product) {
-                req.flash('errors', 'Неверно указан id продукта.');
-                return res.redirect('/');
-            }
-            Cart.remove(req.cart, product);
-            if (req.user) {
-                if (req.cart.totalQty === 0) {
-                    User.findByIdAndUpdate(req.user.id, {
-                            $unset: {
-                                cart: ""
-                            }
-                        })
-                        .then(updResult => {
-                            next();
-                        });
-                } else {
-                    User.findByIdAndUpdate(req.user.id, {
-                            cart: req.cart
-                        })
-                        .then(updResult => {
-                            next();
-                        });
-                }
-            } else {
-                if (req.cart.totalQty === 0) {
-                    req.session.cart = null;
-                }
-                next();
-            }
-        });
+    Cart.remove(req.cart, {
+        id: req.params.id
+    });
+    if (req.user) {
+        if (req.cart.totalQty === 0) {
+            User.findByIdAndUpdate(req.user.id, {
+                    $unset: {
+                        cart: ""
+                    }
+                })
+                .then(updResult => {
+                    next();
+                });
+        } else {
+            User.findByIdAndUpdate(req.user.id, {
+                    cart: req.cart
+                })
+                .then(updResult => {
+                    next();
+                });
+        }
+    } else {
+        if (req.cart.totalQty === 0) {
+            req.session.cart = null;
+        }
+        next();
+    }
 }, (req, res, next) => {
     res.redirect('/cart');
 });

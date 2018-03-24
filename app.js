@@ -16,7 +16,6 @@ var flash = require('connect-flash');
 
 var Config = require('./models/config');
 var User = require('./models/user');
-var Almighty = require('./models/almighty');
 var Counter = require('./models/counter');
 var Review = require('./models/review');
 
@@ -28,6 +27,7 @@ var user = require('./routes/user');
 var product = require('./routes/admin/product');
 var adminCategory = require('./routes/admin/category');
 var shippingAndPayment = require('./routes/admin/shipping-and-payment');
+var shipping = require('./routes/admin/shipping');
 var deleteData = require('./routes/admin/delete');
 var infotechParser = require('./routes/admin/parser');
 
@@ -174,6 +174,7 @@ app.use('/admin', (req, res, next) => {
 app.use('/admin', admin);
 app.use('/admin/product', product);
 app.use('/admin/category', adminCategory);
+app.use('/admin/shipping', shipping);
 app.use('/admin/shipping-and-payment', shippingAndPayment);
 app.use('/admin/delete', deleteData);
 app.use('/admin/parser', infotechParser)
@@ -193,6 +194,7 @@ app.use(function (err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
+  res.locals.title = 'Ой... - ' + res.locals.shopTitle;
   res.render('error');
 });
 

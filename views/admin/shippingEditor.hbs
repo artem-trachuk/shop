@@ -1,0 +1,58 @@
+<div class="row">
+    <div class="col-12 col-lg-6 offset-lg-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="/admin/">Панель управления</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="/admin/shipping">Шаблоны доставки</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Редактор</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12 col-lg-6 offset-lg-3">
+        <form class="bg-light p-2" action="/admin/shipping/editor/{{shipping.id}}" method="POST">
+            <h5 class="float-right text-success">Добавить шаблон доставки</h5>
+            <div class="form-group">
+                <label for="name">Название</label>
+                <input class="form-control" type="text" name="name" required value="{{shipping.name}}">
+            </div>
+            <div class="form-group">
+                <label for="description">Описание</label>
+                <textarea class="form-control" name="description" id="" rows="3" required>{{shipping.description}}</textarea>
+                <small>Описание отображается в корзине и при оформлении заказа.</small>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" name="show" id="show" {{#if shipping.show}}checked{{/if}}>
+                <label class="form-check-label" for="show">Отображать</label>
+            </div>
+            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+            <button type="submit" class="btn btn-success">Сохранить</button>
+        </form>
+        {{#if shipping}}
+        <hr> {{#each shipping.fields}}
+        <div>
+            <form class="form-inline" action="/admin/shipping/editor/{{../shipping.id}}/change-field/{{index}}" method="POST">
+                <div class="form-group mb-2 mr-2">
+                    <input type="text" class="form-control" name="field" id="field" value="{{value}}">
+                </div>
+                <input type="hidden" name="_csrf" value="{{ ../csrfToken }}">
+                <button type="submit" class="btn btn-success mb-2">Изменить</button>
+            </form>
+        </div>
+        {{/each}}
+        <hr>
+        <form class="form-inline" action="/admin/shipping/editor/{{shipping.id}}/add-field" method="POST">
+            <div class="form-group mb-2 mr-2">
+                <input type="text" class="form-control" name="field" id="field" placeholder="Название поля">
+            </div>
+            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+            <button type="submit" class="btn btn-primary mb-2">Добавить</button>
+        </form>
+        {{/if}}
+    </div>
+</div>

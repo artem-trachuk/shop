@@ -11,23 +11,25 @@ var Category = require('../models/category');
 var ShippingField = require('../models/shipping-field');
 var Guarantee = require('../models/guarantee');
 var Field = require('../models/field');
-var Almighty = require('../models/almighty');
+var Admin = require('../models/admin');
 var Review = require('../models/review');
 
 router.use((req, res, next) => {
   if (req.user) {
-    Almighty.findOne({
+    Admin.findOne({
         user: req.user.id
       })
-      .then(almightyUser => {
-        if (almightyUser) {
+      .then(admin => {
+        if (admin) {
           next();
         } else {
-          req.flash('errors', 'У вас нет прав для доступа к панели управления.');
-          res.redirect('/');
+          noAccess();
         }
       });
   } else {
+    noAccess();
+  }
+  var noAccess = function() {
     req.flash('errors', 'У вас нет прав для доступа к панели управления.');
     res.redirect('/');
   }

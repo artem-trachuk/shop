@@ -1,51 +1,33 @@
 <div class="row">
-    <div class="col-12 col-lg-6 offset-lg-3">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item">
-                    <a href="/admin/">Панель управления</a>
-                </li>
-                <li class="breadcrumb-item">
-                    <a href="/admin/shipping-and-payment/">Доставка и оплата</a>
-                </li>
-                <li class="breadcrumb-item">
-                    Доставка
-                </li>
-                <li class="breadcrumb-item active" aria-current="page">{{shipping.name}}</li>
-            </ol>
-        </nav>
-    </div>
-</div>
-<div class="row">
-    <div class="col-12 col-lg-6">
-        <form action="/admin/shipping-and-payment/shipping/{{shipping.id}}" method="POST">
-            <div class="form-group">
-                <label for="name">Название способа доставки</label>
-                <input class="form-control" type="text" name="name" value="{{shipping.name}}">
-            </div>
-            <div class="form-group">
-                <label for="description">Описание способа доставки</label>
-                <textarea class="form-control" type="text" name="description" rows="3">{{shipping.description}}</textarea>
-            </div>
-            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
-            <button type="submit" class="btn btn-success">Сохранить</button>
-        </form>
+    <div class="col-12 col-lg-3">
+        {{> adminNavigation}}
     </div>
     <div class="col-12 col-lg-6">
-        <form class="form-inline" action="/admin/shipping-and-payment/shipping/{{shipping._id}}/add-field" method="POST">
-            <div class="form-group mb-2">
-                <label class="mr-2" for="name">Добавить поле</label>
-                <input class="form-control mr-2" type="text" name="name">
+        <h2>Шаблоны доставки</h2>
+        <a href="/admin/shipping/editor">Добавить</a>
+        <div class="row">
+            <div class="col-12">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Название</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each allShip}}
+                        <tr>
+                            <td>{{this.name}}</td>
+                            <td>
+                                <a href="/admin/shipping/editor/{{_id}}" class="text-info">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
             </div>
-            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
-            <button type="submit" class="btn btn-primary">Добавить поле</button>
-        </form>
-        <hr>
-        {{#each fields}}
-        <form class="form-inline mb-1" method="POST" action="/admin/shipping-and-payment/shipping/{{../shipping.id}}/shipping-field/{{id}}">
-            <input type="text" class="form-control mr-2" value="{{name}}" name="name">
-            <input type="hidden" name="_csrf" value="{{ ../csrfToken }}">
-            <button type="submit" class="btn btn-success btn-sm">Сохранить</button>
-        </form> {{/each}}
+        </div>
     </div>
 </div>

@@ -8,10 +8,7 @@ var shippingSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
-    fields: {
-        type: [schemaTypes.ObjectId],
-        ref: 'ShippingField'
-    }
+    fields: [String]
 });
 
 module.exports = mongoose.model('Shipping', shippingSchema);
