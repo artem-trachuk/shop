@@ -8,7 +8,17 @@ var shippingSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
-    fields: [String]
+    fields: {
+        type: [
+            {
+                field: String,
+                required: {
+                    type: Boolean,
+                    default: false
+                }
+            }
+        ]
+    }
 });
 
 module.exports = mongoose.model('Shipping', shippingSchema);

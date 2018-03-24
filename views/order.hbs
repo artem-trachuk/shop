@@ -28,22 +28,30 @@
                 {{/if}}
                 <tr>
                     <td colspan="2" class="text-right">
-                        <span class="text-info font-weight-bold">Доставка ({{shipping}})</span>
+                        <span class="text-info font-weight-bold">Доставка ({{order.shipping.name}})</span>
                     </td>
                 </tr>
-                {{#each shippingData}}
+                {{#each order.shipping.fields}}
                 <tr>
                     <td>
-                        <strong>{{fieldName}}</strong>
+                        <strong>{{field}}</strong>
                     </td>
-                    <td>{{fieldValue}} </td>
+                    <td>{{value}} </td>
                 </tr>
                 {{/each}}
                 <tr>
                     <td colspan="2" class="text-right">
-                        <span class="text-info font-weight-bold">Оплата ({{payment}})</span>
+                        <span class="text-info font-weight-bold">Оплата ({{order.payment.name}})</span>
                     </td>
                 </tr>
+                {{#each order.payment.fields}}
+                <tr>
+                    <td>
+                        <strong>{{field}}</strong>
+                    </td>
+                    <td>{{value}} </td>
+                </tr>
+                {{/each}}
             </tbody>
         </table>
         <table class="table">

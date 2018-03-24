@@ -23,24 +23,22 @@ var orderSchema = new mongoose.Schema({
     reciveDate: {
         type: Date
     },
-    clientNote: String,
+    clientsNote: String,
     workingNote: String,
+    noteForClient: String,
     shipping: {
-        type: schemaTypes.ObjectId,
-        ref: 'Shipping'
-    },
-    shippingFieldData: {
-        type: [{
-            fieldId: {
-                type: schemaTypes.ObjectId,
-                ref: 'ShippingField'
-            },
-            fieldValue: String
+        name: String,
+        fields: [{
+            field: String,
+            value: String
         }]
     },
     payment: {
-        type: schemaTypes.ObjectId,
-        ref: 'Payment'
+        name: String,
+        fields: [{
+            field: String,
+            value: String
+        }]
     },
     article: Number
 });

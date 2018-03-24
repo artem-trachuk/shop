@@ -6,7 +6,7 @@
                     <a href="/admin/">Панель управления</a>
                 </li>
                 <li class="breadcrumb-item">
-                    <a href="/admin/shipping">Шаблоны доставки</a>
+                    <a href="/admin/payment">Шаблоны оплаты</a>
                 </li>
                 <li class="breadcrumb-item active" aria-current="page">Редактор</li>
             </ol>
@@ -15,32 +15,32 @@
 </div>
 <div class="row">
     <div class="col-12 col-lg-6 offset-lg-3">
-        <form class="bg-light p-2" action="/admin/shipping/editor/{{shipping.id}}" method="POST">
-            {{#if shipping}}
-            <h5 class="text-success">{{shipping.name}}</h5>
+        <form class="bg-light p-2" action="/admin/payment/editor/{{payment.id}}" method="POST">
+            {{#if payment}}
+            <h5 class="text-success">{{payment.name}}</h5>
             {{else}}
-            <h5 class="text-success">Добавить шаблон доставки</h5>
+            <h5 class="text-success">Добавить шаблон оплаты</h5>
             {{/if}}
             <div class="form-group">
                 <label for="name">Название</label>
-                <input class="form-control" type="text" name="name" required value="{{shipping.name}}">
+                <input class="form-control" type="text" name="name" required value="{{payment.name}}">
             </div>
             <div class="form-group">
                 <label for="description">Описание</label>
-                <textarea class="form-control" name="description" id="" rows="3" required>{{shipping.description}}</textarea>
+                <textarea class="form-control" name="description" id="" rows="3" required>{{payment.description}}</textarea>
                 <small>Описание отображается в корзине и при оформлении заказа.</small>
             </div>
             <div class="form-check">
-                <input type="checkbox" class="form-check-input" name="show" id="show" {{#if shipping.show}}checked{{/if}}>
+                <input type="checkbox" class="form-check-input" name="show" id="show" {{#if payment.show}}checked{{/if}}>
                 <label class="form-check-label" for="show">Отображать шаблон для покупателей</label>
             </div>
             <input type="hidden" name="_csrf" value="{{ csrfToken }}">
             <button type="submit" class="btn btn-success">Сохранить</button>
         </form>
-        {{#if shipping}}
-        <hr> {{#each shipping.fields}}
+        {{#if payment}}
+        <hr> {{#each payment.fields}}
         <div>
-            <form class="form-inline" action="/admin/shipping/editor/{{../shipping.id}}/change-field/{{id}}" method="POST">
+            <form class="form-inline" action="/admin/payment/editor/{{../payment.id}}/change-field/{{id}}" method="POST">
                 <div class="form-group mb-2 mr-2">
                     <input type="text" class="form-control" name="field" id="field" value="{{field}}">
                 </div>
@@ -54,7 +54,7 @@
         </div>
         {{/each}}
         <hr>
-        <form class="form-inline" action="/admin/shipping/editor/{{shipping.id}}/add-field" method="POST">
+        <form class="form-inline" action="/admin/payment/editor/{{payment.id}}/add-field" method="POST">
             <div class="form-group mb-2 mr-2">
                 <input type="text" class="form-control" name="field" id="field" placeholder="Название поля">
             </div>

@@ -60,22 +60,14 @@ router.get('/checkout', function (req, res, next) {
     Shipping.findById(req.session.shippingId)
         .then(shipping => {
             res.locals.shipping = shipping;
-            return ShippingField.find({
-                _id: {
-                    $in: shipping.fields
-                }
-            });
-        })
-        .then(shippingFields => {
-            res.locals.shippingFields = shippingFields;
             next();
-        });
+        }).catch(err => next(err));
 }, (req, res, next) => {
     Payment.findById(req.session.paymentId)
         .then(payment => {
             res.locals.payment = payment;
             next();
-        });
+        }).catch(err => next(err));
 }, (req, res, next) => {
     res.locals.title = 'Оформить заказ - ' + res.locals.shopTitle;
     res.render('checkout', {
@@ -103,49 +95,63 @@ router.post('/checkout', (req, res, next) => {
     var fields = req.body;
     fieldsLength = Object.keys(fields).length;
     var done = 0;
+    var order = new Order();
+    order.orderDate = new Date();
+    order.user = req.user;
+    order.cart = req.cart;
     Counter.findOneAndUpdate({
-            $inc: {
-                order: 1
-            }
-        })
+        $inc: {
+            order: 1
+        }
+    })
         .then(counter => {
-            Order.create({
-                    orderDate: new Date(),
-                    user: req.user,
-                    cart: req.cart,
-                    article: counter.order,
-                    shipping: shippingId,
-                    payment: paymentId
-                })
-                .then(order => {
-                    req.orderId = order.id;
-                    for (f in fields) {
-                        (function (field) {
-                            if (field === '_csrf') {
-                                done++;
-                            } else {
-                                order.shippingFieldData.push({
-                                    fieldId: field,
-                                    fieldValue: fields[f]
-                                });
-                                done++;
-                            }
-                            if (done === fieldsLength) {
-                                Order.findByIdAndUpdate(order.id, order)
-                                    .then(updateResul => next())
-                                    .catch(err => next(err));
-                            }
-                        })(f);
-                    }
-                });
+            order.article = counter.order;
+            return Shipping.findById(shippingId);
         })
+        .then(shipping => {
+            var fieldsResult = [];
+            for (field in fields) {
+                if (field.indexOf('ship') > -1) {
+                    fieldsResult.push({
+                        field: shipping.fields.find(f => f.id === field.slice(5)).field,
+                        value: fields[field]
+                    });
+                }
+            }
+            order.shipping = {
+                name: shipping.name,
+                fields: fieldsResult
+            }
+            return Payment.findById(paymentId);
+        })
+        .then(payment => {
+            var fieldsResult = [];
+            for (field in fields) {
+                if (field.indexOf('pay') > -1) {
+                    fieldsResult.push({
+                        field: payment.fields.find(f => f.id === field.slice(4)).field,
+                        value: fields[field]
+                    });
+                }
+            }
+            order.payment = {
+                name: payment.name,
+                fields: fieldsResult
+            }
+            return order.save();
+        })
+        .then(save => {
+            req.orderId = save.id;
+            next();
+        })
+        .catch(err => next(err));
 }, (req, res, next) => {
     if (req.user) {
         User.findByIdAndUpdate(req.user.id, {
-                $unset: {
-                    cart: ""
-                }
-            })
+            $unset: {
+                cart: ""
+            }
+        })
             .then(updRes => {
                 next();
             });
@@ -174,7 +180,7 @@ router.get('/order/:id', (req, res, next) => {
             Order.findById(req.params.id)
                 .then(order => {
                     if (order) {
-                        req.order = order;
+                        res.locals.order = order;
                         next();
                     } else {
                         showError();
@@ -185,12 +191,12 @@ router.get('/order/:id', (req, res, next) => {
         }
     } else if (req.user) {
         Order.findOne({
-                user: req.user.id,
-                _id: req.params.id
-            })
+            user: req.user.id,
+            _id: req.params.id
+        })
             .then(order => {
                 if (order) {
-                    req.order = order;
+                    res.locals.order = order;
                     next();
                 } else {
                     showError();
@@ -199,11 +205,11 @@ router.get('/order/:id', (req, res, next) => {
     } else {
         showError();
     }
-
-
 }, (req, res, next) => {
-    res.locals.order = req.order;
-    switch (req.order.status) {
+    switch (res.locals.order.status) {
+        case 0:
+            res.locals.status = 'Отправлено на рассмотрение';
+            break;
         case 1:
             res.locals.status = 'Обрабатывается';
             break;
@@ -220,34 +226,7 @@ router.get('/order/:id', (req, res, next) => {
             res.locals.status = 'Отказ';
             break;
     };
-    shippingData = [];
-    var done = 0;
-    req.order.shippingFieldData.forEach(d => {
-        ShippingField.findById(d.fieldId)
-            .then(field => {
-                if (field) {
-                    shippingData.push({
-                        fieldName: field.name,
-                        fieldValue: d.fieldValue
-                    });
-                }
-                done++;
-                if (done === req.order.shippingFieldData.length) {
-                    res.locals.shippingData = shippingData;
-                    next();
-                }
-            });
-    });
-}, (req, res, next) => {
-    Shipping.findById(req.order.shipping)
-        .then(ship => {
-            res.locals.shipping = ship.name;
-            return Payment.findById(req.order.payment);
-        })
-        .then(payment => {
-            res.locals.payment = payment.name;
-            next();
-        })
+    next();
 }, (req, res, next) => {
     res.locals.title = 'Заказ ' + res.locals.order.article + ' - ' + res.locals.shopTitle;
     res.render('order');
@@ -293,8 +272,8 @@ router.get('/add-to-cart/:id', function (req, res, next) {
             Cart.add(req.cart, product);
             if (req.user) {
                 User.findByIdAndUpdate(req.user.id, {
-                        cart: req.cart
-                    })
+                    cart: req.cart
+                })
                     .then(updResult => {
                         next();
                     })
@@ -324,17 +303,17 @@ router.get('/remove-from-cart/:id', (req, res, next) => {
     if (req.user) {
         if (req.cart.totalQty === 0) {
             User.findByIdAndUpdate(req.user.id, {
-                    $unset: {
-                        cart: ""
-                    }
-                })
+                $unset: {
+                    cart: ""
+                }
+            })
                 .then(updResult => {
                     next();
                 });
         } else {
             User.findByIdAndUpdate(req.user.id, {
-                    cart: req.cart
-                })
+                cart: req.cart
+            })
                 .then(updResult => {
                     next();
                 });

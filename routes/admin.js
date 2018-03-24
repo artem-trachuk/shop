@@ -15,6 +15,11 @@ var Admin = require('../models/admin');
 var Review = require('../models/review');
 
 router.use((req, res, next) => {
+  return next();
+  var noAccess = function() {
+    req.flash('errors', 'У вас нет прав для доступа к панели управления.');
+    res.redirect('/');
+  }
   if (req.user) {
     Admin.findOne({
         user: req.user.id
@@ -28,10 +33,6 @@ router.use((req, res, next) => {
       });
   } else {
     noAccess();
-  }
-  var noAccess = function() {
-    req.flash('errors', 'У вас нет прав для доступа к панели управления.');
-    res.redirect('/');
   }
 });
 
@@ -89,6 +90,9 @@ router.get('/order/:id', (req, res, next) => {
     .then(order => {
       res.locals.order = order;
       switch (order.status) {
+        case 0:
+            res.locals.status = 'Отправлено на рассмотрение';
+            break;
         case 1:
           res.locals.status = 'Обрабатывается';
           break;

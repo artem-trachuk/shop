@@ -28,6 +28,7 @@ var product = require('./routes/admin/product');
 var adminCategory = require('./routes/admin/category');
 var shippingAndPayment = require('./routes/admin/shipping-and-payment');
 var shipping = require('./routes/admin/shipping');
+var payment = require('./routes/admin/payment');
 var deleteData = require('./routes/admin/delete');
 var infotechParser = require('./routes/admin/parser');
 
@@ -77,6 +78,9 @@ hbs.registerHelper('filterSelected', (query, name, fieldvalue) => {
 
 hbs.registerHelper('statusSwitch', (status) => {
   switch (status) {
+    case 0:
+      return 'Отправлено на рассмотрение';
+      break;
     case 1:
       return 'Обрабатывается';
       break;
@@ -164,17 +168,18 @@ app.use('/category', category);
 app.use('/cart', cart);
 app.use('/user', user);
 app.use('/admin', (req, res, next) => {
-  Review.count({checked: false})
-  .then(counter => {
-    res.locals.reviewsCounter = counter;
-    next();
-  })
-  .catch(err => next(err));
+  Review.count({ checked: false })
+    .then(counter => {
+      res.locals.reviewsCounter = counter;
+      next();
+    })
+    .catch(err => next(err));
 })
 app.use('/admin', admin);
 app.use('/admin/product', product);
 app.use('/admin/category', adminCategory);
 app.use('/admin/shipping', shipping);
+app.use('/admin/payment', payment);
 app.use('/admin/shipping-and-payment', shippingAndPayment);
 app.use('/admin/delete', deleteData);
 app.use('/admin/parser', infotechParser)
@@ -214,10 +219,10 @@ Config.findOne(function (err, doc) {
 });
 
 Counter.findOne()
-.then(counter => {
-  if (!counter) {
-    Counter.create({});
-  }
-});
+  .then(counter => {
+    if (!counter) {
+      Counter.create({});
+    }
+  });
 
 module.exports = app;

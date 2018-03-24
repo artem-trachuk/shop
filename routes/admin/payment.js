@@ -1,51 +1,51 @@
 var express = require('express');
 var router = express.Router();
 
-var Shipping = require('../../models/shipping');
+var Payment = require('../../models/payment');
 
 var csrf = require('csurf');
 router.use(csrf());
 
 router.get('/', (req, res, next) => {
-    res.locals.title = 'Панель управления / Шаблоны доставки - ' + res.locals.shopTitle;
-    res.locals.shippingMenu = true;
+    res.locals.title = 'Панель управления / Шаблоны оплаты - ' + res.locals.shopTitle;
+    res.locals.paymentMenu = true;
     next();
 }, (req, res, next) => {
-    Shipping.find()
-        .then(allShip => {
-            res.locals.allShip = allShip;
-            res.render('admin/shipping');
+    Payment.find()
+        .then(allPayments => {
+            res.locals.allPayments = allPayments;
+            res.render('admin/payment');
         }).catch(err => next(err));
 });
 
 router.get('/editor', (req, res, next) => {
-    res.locals.title = 'Панель управления / Шаблоны доставки / Редактор - ' + res.locals.shopTitle;
+    res.locals.title = 'Панель управления / Шаблоны оплаты / Редактор - ' + res.locals.shopTitle;
     res.locals.csrfToken = req.csrfToken();
-    res.render('admin/shippingEditor');
+    res.render('admin/paymentEditor');
 });
 
 router.post('/editor', (req, res, next) => {
     var formData = req.body;
     var show = formData.show === 'on' ? true : false;
-    Shipping.create({
+    Payment.create({
         name: formData.name,
         description: formData.description,
         show: show
     }).then(createResult => {
-        res.redirect('/admin/shipping/editor/' + createResult.id);
+        res.redirect('/admin/payment/editor/' + createResult.id);
     }).catch(err => next(err));
 });
 
 router.get('/editor/:id', (req, res, next) => {
     res.locals.csrfToken = req.csrfToken();
-    res.locals.title = 'Панель управления / Шаблоны доставки / Редактор - ' + res.locals.shopTitle;
-    Shipping.findById(req.params.id).then(shipping => {
-        if (shipping) {
-            res.locals.shipping = shipping;
-            res.render('admin/shippingEditor');
+    res.locals.title = 'Панель управления / Шаблоны оплаты / Редактор - ' + res.locals.shopTitle;
+    Payment.findById(req.params.id).then(payment => {
+        if (payment) {
+            res.locals.payment = payment;
+            res.render('admin/paymentEditor');
         } else {
-            req.flash('errors', 'Неверно указан id шаблона доставки.');
-            res.redirect('/admin/shipping');
+            req.flash('errors', 'Неверно указан id шаблона оплаты.');
+            res.redirect('/admin/payment');
         }
     }).catch(err => next(err));
 });
@@ -53,17 +53,17 @@ router.get('/editor/:id', (req, res, next) => {
 router.post('/editor/:id', (req, res, next) => {
     var formData = req.body;
     var show = formData.show === 'on' ? true : false;
-    Shipping.findByIdAndUpdate(req.params.id, {
+    Payment.findByIdAndUpdate(req.params.id, {
         name: formData.name,
         description: formData.description,
         show: show
     }).then(createResult => {
-        res.redirect('/admin/shipping/editor/' + createResult.id);
+        res.redirect('/admin/payment/editor/' + createResult.id);
     }).catch(err => next(err));
 });
 
 router.post('/editor/:id/add-field', (req, res, next) => {
-    Shipping.findByIdAndUpdate(req.params.id, {
+    Payment.findByIdAndUpdate(req.params.id, {
         $push: {
             fields: {
                 field: req.body.field,
@@ -71,7 +71,7 @@ router.post('/editor/:id/add-field', (req, res, next) => {
             }
         }
     }).then(updateResult => {
-        res.redirect('/admin/shipping/editor/' + req.params.id);
+        res.redirect('/admin/payment/editor/' + req.params.id);
     }).catch(err => next(err));
 });
 
@@ -79,23 +79,23 @@ router.post('/editor/:id/change-field/:fieldId', (req, res, next) => {
     var field = req.body.field;
     var isRequired = req.body.isRequired === 'on' ? true : false;
     if (field.length > 0) {
-        Shipping.findOneAndUpdate({_id: req.params.id, 'fields._id': req.params.fieldId}, {
+        Payment.findOneAndUpdate({_id: req.params.id, 'fields._id': req.params.fieldId}, {
             $set: {
                 'fields.$.field': field,
                 'fields.$.required': isRequired
             }
         }).then(updateResult => {
-            res.redirect('/admin/shipping/editor/' + req.params.id);
+            res.redirect('/admin/payment/editor/' + req.params.id);
         }).catch(err => next(err));
     } else {
-        Shipping.findByIdAndUpdate(req.params.id, {
+        Payment.findByIdAndUpdate(req.params.id, {
             $pull: {
                 fields: {
                     _id: req.params.fieldId
                 }
             }
         }).then(updateResult => {
-            res.redirect('/admin/shipping/editor/' + req.params.id);
+            res.redirect('/admin/payment/editor/' + req.params.id);
         }).catch(err => next(err));
     }
 });

@@ -1,21 +1,33 @@
 <div class="row">
     <div class="col-12 col-lg-6 offset-lg-3">
         <h2>Оформить заказ</h2>
-        <div class="text-right">
-            <h5>{{shipping.name}}</h5>
-            <p class="text-secondary">{{shipping.description}}</p>
-        </div>
-        <div class="text-right">
-            <h5>{{payment.name}}</h5>
-            <p class="text-secondary">{{payment.description}}</p>
-        </div>
         <form action="/cart/checkout" method="POST">
-            {{#each shippingFields}}
+            <div class="text-right">
+                <h5>{{shipping.name}}</h5>
+                <p class="text-secondary">{{shipping.description}}</p>
+            </div>
+            {{#each shipping.fields}}
             <div class="form-group">
-                <label for="">{{this.name}}</label>
-                <input type="text" class="form-control" name="{{this.id}}" required>
+                <label for="">{{field}}</label>
+                <input type="text" class="form-control" name="ship_{{id}}" {{#if required}}required{{/if}}>
             </div>
             {{/each}}
+            <hr>
+            <div class="text-right">
+                <h5>{{payment.name}}</h5>
+                <p class="text-secondary">{{payment.description}}</p>
+            </div>
+            {{#each payment.fields}}
+            <div class="form-group">
+                <label for="">{{field}}</label>
+                <input type="text" class="form-control" name="pay_{{id}}" {{#if required}}required{{/if}}>
+            </div>
+            {{/each}}
+            <hr>
+            <div class="form-group">
+                <label for="clientsNote">Ваше примечание</label>
+                <textarea class="w-100" name="clientsNote" id="clientsNote" cols="30" rows="4"></textarea>
+            </div>
             <input type="hidden" name="_csrf" value="{{ csrfToken }}">
             <div class="clearfix">
                 <button type="submit" class="btn btn-success float-right">Готово
