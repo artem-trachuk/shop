@@ -6,12 +6,7 @@ var reviewSchema = new mongoose.Schema({
         type: schemaTypes.ObjectId,
         ref: 'User'
     },
-    review: String,
-    date: Date,
-    checked: {
-        type: Boolean,
-        default: false
-    }
+    review: String
 });
 
 module.exports = mongoose.model('Review', reviewSchema);

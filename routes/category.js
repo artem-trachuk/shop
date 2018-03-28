@@ -17,16 +17,16 @@ router.get('/:id', buildCategories, (req, res, next) => { // find all products i
     var fields = res.locals.query = req.query;
     const fieldsLength = Object.keys(fields).length;
     // find products with filters
-    if (fieldsLength > 0) {
+    if ((fieldsLength > 0 && !fields['page']) || (fieldsLength > 1 && fields['page'])) {
         var products = [];
         var done = 0;
         for (f in fields) {
             (function (field) {
-                if (field === '_csrf') {
+                if (field === '_csrf' || field == 'page') {
                     done++;
                 } else {
                     Product.find({
-                            "data.fieldId": field,
+                            "data.field": field,
                             "data.fieldValue": fields[f]
                         })
                         .then(p => {
@@ -75,6 +75,7 @@ router.get('/:id', buildCategories, (req, res, next) => { // find all products i
         })
         .then(products => {
             res.locals.allProducts = products;
+            res.locals.count = products.length;
             next();
         })
         .catch(err => {
@@ -86,6 +87,7 @@ router.get('/:id', buildCategories, (req, res, next) => { // find all products i
     var findFields = function (categoryId) {
         Category.findById(categoryId)
             .then(category => {
+                res.locals.categoryName = category.name;
                 // has parent category
                 if (category.parentCategory) {
                     // push to array curent category's fields
@@ -115,11 +117,13 @@ router.get('/:id', buildCategories, (req, res, next) => { // find all products i
                                     var values = [];
                                     products.forEach(product => {
                                         product.data.forEach(data => {
-                                            if (data.fieldId.toString() === fields[index].id) {
-                                                values.push({
-                                                    fieldValue: data.fieldValue,
-                                                    fieldId: fields[index].id
-                                                });
+                                            if (data.field.toString() === fields[index].id) {
+                                                if (!values.find(v => v.fieldValue === data.fieldValue)) {
+                                                    values.push({
+                                                        fieldValue: data.fieldValue,
+                                                        fieldId: fields[index].id
+                                                    });
+                                                }
                                             }
                                         });
                                     });
@@ -147,11 +151,33 @@ router.get('/:id', buildCategories, (req, res, next) => { // find all products i
             });
     }
     findFields(req.params.id);
-}, (req, res, next) => { // render page
+}, (req, res, next) => {
+    Config.findOne().then(config => {
+      res.locals.productsPerPage = config.productsPerPage;
+      next();
+    }).catch(err => next(err));
+  }, (req, res, next) => { // render page
     Category.findById(req.params.id)
         .then(category => {
+            var query = res.locals.query;
+            res.locals.navString = ''
+            for (q in query) {
+                if (q !== 'page') {
+                    if (Array.isArray(query[q])) {
+                        query[q].forEach(qElem => {
+                            res.locals.navString += '&' + q + '=' + qElem;
+                        });
+                    } else {
+                        res.locals.navString += '&' + q + '=' + query[q];
+                    }
+                }
+            }
+            var page = req.query.page ? parseInt(req.query.page) : 1;
+            var length = res.locals.products.length;
+            res.locals.products = res.locals.products.slice((res.locals.productsPerPage * (page - 1)), (res.locals.productsPerPage * page));
+            require('./helpers/buildPagination')(res.locals, page, length, res.locals.productsPerPage);
             res.locals.title = category.name + ' - ' + res.locals.shopTitle;
-            res.render('category');
+            res.render('index');
         })
         .catch(err => {
             req.flash('errors', 'Не удалось выполнить запрос.');

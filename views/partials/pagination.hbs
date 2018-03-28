@@ -1,0 +1,18 @@
+<nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-end mb-0">
+        <li class="page-item {{#if prevPageDisabled}}disabled{{/if}}">
+            {{#if fields}}
+            <a class="page-link" href="/category/{{categoryId}}?page={{prevPageIndex}}{{navString}}">Предыдущие</a>
+            {{else}}
+            <a class="page-link" href="/?page={{prevPageIndex}}">Предыдущие</a>
+            {{/if}}
+        </li>
+        <li class="page-item {{#if nextPageDisabled}}disabled{{/if}}">
+            {{#if fields}}
+            <a class="page-link" href="/category/{{categoryId}}?page={{nextPageIndex}}{{navString}}">Следующие</a>
+            {{else}}
+            <a class="page-link" href="/?page={{nextPageIndex}}">Следующие</a>
+            {{/if}}
+        </li>
+    </ul>
+</nav>

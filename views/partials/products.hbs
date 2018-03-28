@@ -1,56 +1,31 @@
 <div class="row">
     {{#each products}}
-    <div class="col-12 col-lg-4 px-lg-3 mb-lg-5 d-flex flex-column">
-        <div class="row" style="flex-grow: 1;">
-            <div class="col-11">
-                <div class="row">
-                    <div class="col">
-                        <a href="/product/{{_id}}" class="text-white">
-                            <h6 class="text-center bg-success font-weight-bold border border-success rounded">{{title}}</h6>
-                        </a>
-                    </div>
-                    <div class="w-100"></div>
-                    <div class="col">
-                        {{#if imagePath}}
-                        <img class="w-50 float-right" src="{{imagePath}}" alt="{{title}}"> {{/if}}
-                        <small>{{description}}</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-9 text-right">
-                <h5>{{price}} грн.{{#if USDprice}}
-                    <span class="text-secondary"> (${{USDprice}})</span>{{/if}}</h5>
-            </div>
-            <div class="col-2">
+    <div class="col-12 col-lg-3 p-lg-1 d-flex">
+        <div class="d-flex px-2 flex-column border product">
+            <header>
+                {{#if imagePath}}
+                <img class="w-100" src="{{imagePath}}" alt="{{title}}"> {{/if}}
+                <a class="text-dark my-2" href="/product/{{_id}}">{{title}}</a>
+            </header>
+            <main style="flex-grow: 1;">
+                <small class="text-secondary">{{ellipsis description 140}}</small>
+            </main>
+            <footer class="mt-2 text-right">
                 {{#if price}}
-                <a href="/cart/add-to-cart/{{_id}}" class="text-success">
-                    <h5>
-                        <i class="fas fa-cart-arrow-down"></i>
-                    </h5>
-                </a>
+                <h5>
+                    <a href="/cart/add-to-cart/{{_id}}" class="text-dark"><i class="fas fa-cart-arrow-down"></i></a> {{price}} грн</h5>
                 {{else}}
-                <h5 class="text-secondary">
+                <h5 class="text-muted">
                     <i class="fas fa-cart-arrow-down"></i>
                 </h5>
                 {{/if}}
-            </div>
+            </footer>
         </div>
     </div>
     {{/each}}
 </div>
 <div class="row">
     <div class="col-12">
-        <nav aria-label="Page navigation example">
-            <ul class="pagination justify-content-end">
-                <li class="page-item {{#if prevPageDisabled}}disabled{{/if}}">
-                    <a class="page-link" href="/?page={{prevPageIndex}}">Предыдущие</a>
-                </li>
-                <li class="page-item {{#if nextPageDisabled}}disabled{{/if}}">
-                    <a class="page-link" href="/?page={{nextPageIndex}}">Следующие</a>
-                </li>
-            </ul>
-        </nav>
+        
     </div>
 </div>

@@ -1,7 +1,9 @@
 var express = require('express');
 var router = express.Router();
 var passport = require('passport');
-
+var moment = require('moment');
+moment.locale('ru');
+var mongoose = require('mongoose');
 var Order = require('../models/order');
 
 var csrf = require('csurf');
@@ -9,10 +11,15 @@ router.use(csrf());
 
 /* GET profile page. */
 router.get('/profile', isLoggedIn, function (req, res, next) {
+    res.locals.title = 'Профиль - ' + res.locals.shopTitle;
     Order.find({
         user: req.user.id
-    })
+    }).sort({_id: -1})
     .then(orders => {
+        orders = orders.map(o => {
+            o.date = moment(mongoose.Types.ObjectId(o._id).getTimestamp()).fromNow();
+            return o;
+        });
         res.locals.orders = orders;
         res.render('user/profile');
     })

@@ -15,10 +15,18 @@
             <tbody>
                 {{#each orders}}
                 <tr>
-                    <td>{{showDate this.orderDate}}</td>
-                    <td>{{this.user}}</td>
+                    <td>{{date}}</td>
+                    {{#if user}}
+                    <td><a target="_blank" class="text-primary" href="https://www.facebook.com/{{user.fbId}}"><i class="fab fa-facebook-square"></i></a> {{user.displayName}}</td>
+                    {{else}}
+                    <td class="font-italic text-secondary">(гостевой сеанс)</td>
+                    {{/if}}
                     <td>{{article}}</td>
-                    <td>{{statusSwitch status}}</td>
+                    {{#if state}}
+                    <td>{{state}}</td>
+                    {{else}}
+                    <td class="font-italic text-secondary">(не указан)</td>
+                    {{/if}}
                     <td><a href="/admin/order/{{this.id}}"><i class="fas fa-arrow-right"></i></a></td>
                 </tr>
                 {{/each}}

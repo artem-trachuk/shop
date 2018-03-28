@@ -1,0 +1,43 @@
+{{> messages}}
+<div class="row">
+    <div class="col-12 col-lg-3">{{> adminNavigation}}</div>
+    <div class="col-12 col-lg-6">
+        <form action="/admin" method="POST">
+            <div class="form-group">
+                <label for="shopTitle">Название сайта</label>
+                <input type="text" name="shopTitle" id="shopTitle" value="{{shopTitle}}" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="productsPerPage">Продуктов на странице</label>
+                <input type="number" min="0" name="productsPerPage" id="productsPerPage" value="{{productsPerPage}}" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Описание сайта</label>
+                <textarea class="form-control" id="description" name="description" rows="3">{{description}}</textarea>
+                <small class="form-text text-muted">
+                    Описание отображается в заголовке главной страницы после названия сайта и в нижней части на всех страницах
+                </small>
+            </div>
+            <input type="hidden" name="_csrf" value="{{csrfToken}}">
+            <button class="btn btn-success" type="submit">Сохранить</button>
+        </form>
+        <hr>
+        <h5>Телефоны</h5>
+        <form class="form-inline mb-2" action="/admin/phones/" method="POST">
+            <div class="form-group">
+                <input class="form-control mr-2" name="phone" type="text" required>
+            </div>
+            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+            <button type="submit" class="btn btn-primary btn-sm">Добавить</button>
+        </form>
+        {{#each phones}}
+        <form class="form-inline mb-2" action="/admin/phones/{{_id}}" method="POST">
+            <div class="form-group">
+                <input class="form-control mr-2" name="phone" type="text" value="{{phone}}">
+            </div>
+            <input type="hidden" name="_csrf" value="{{ ../csrfToken }}">
+            <button type="submit" class="btn btn-success btn-sm">Сохранить</button>
+        </form>
+        {{/each}}
+    </div>
+</div>

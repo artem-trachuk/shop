@@ -43,7 +43,7 @@
                             </ul>
                         </div>
                         <div class="modal-footer">
-                            <a href="/admin/delete/category/{{category._id}}" class="btn btn-danger float-right" data-toggle="tooltip" data-placement="bottom">Удалить</a>
+                            <a href="/admin/delete/category/{{category._id}}" class="btn btn-danger float-right">Удалить</a>
                         </div>
                     </div>
                 </div>
@@ -59,13 +59,12 @@
             </div>
             <div class="form-group">
                 <label for="name">Родительская категория</label>
-                <select class="form-control" id="parentCategory" name="parentCategory" {{#if category.parentCategory}}disabled{{/if}}>
+                <select class="form-control" id="parentCategory" name="parentCategory">
                     <option disabled selected>Выберите категорию</option>
                     {{#each categories}}
                     <option value={{id}} {{optionHelper ../selectedValue id}}>{{name}}</option>
                     {{/each}}
                 </select>
-                <small><span class="font-weight-bold">Внимание!</span> Родительскую категорию после выбора и сохранения невозможно сменить.</small>
             </div>
             <input type="hidden" name="_csrf" value="{{ csrfToken }}">
             <div class="clearfix">
@@ -77,8 +76,3 @@
         </form>
     </div>
 </div>
-<script>
-    $(function () {
-        $('[data-toggle="tooltip"]').tooltip();
-    })
-</script>

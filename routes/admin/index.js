@@ -1,22 +1,28 @@
 var express = require('express');
 var router = express.Router();
 
+var mongoose = require('mongoose');
+var reviews = require('./reviews');
+var orders = require('./orders');
+var moment = require('moment');
+moment.locale('ru');
+
 var csrf = require('csurf');
 router.use(csrf());
 
-var Config = require('../models/config');
-var Product = require('../models/product');
-var Order = require('../models/order');
-var Category = require('../models/category');
-var ShippingField = require('../models/shipping-field');
-var Guarantee = require('../models/guarantee');
-var Field = require('../models/field');
-var Admin = require('../models/admin');
-var Review = require('../models/review');
+var Config = require('../../models/config');
+var Product = require('../../models/product');
+var Order = require('../../models/order');
+var Category = require('../../models/category');
+var Guarantee = require('../../models/guarantee');
+var Field = require('../../models/field');
+var Admin = require('../../models/admin');
+var Review = require('../../models/review');
+var OrderState = require('../../models/orderState');
 
 router.use((req, res, next) => {
-  return next();
-  var noAccess = function() {
+  // return next();
+  var noAccess = function () {
     req.flash('errors', 'У вас нет прав для доступа к панели управления.');
     res.redirect('/');
   }
@@ -30,26 +36,86 @@ router.use((req, res, next) => {
         } else {
           noAccess();
         }
-      });
+      })
+      .catch(err => next(err));
   } else {
     noAccess();
   }
 });
 
+router.use((req, res, next) => {
+  Order.find({
+      state: {
+        $exists: false
+      }
+    }).count().then(orders => {
+      res.locals.ordersCount = orders;
+      next();
+    })
+    .catch(err => next(err));
+});
+
+router.get('/', (req, res, next) => {
+  res.redirect('/admin/home');
+});
+
+router.use('/reviews', reviews);
+router.use('/orders', orders);
+
 /* GET Admin page. */
-router.get('/', function (req, res, next) {
+router.get('/config', function (req, res, next) {
   Config.findOne()
-    .then(one => res.render('admin', {
+    .then(one => res.render('admin/config', {
       title: 'Панель управления - ' + one.title,
       shopTitle: one.title,
-      USDtoUAH: one.USDtoUAH,
       address: one.address,
       description: one.description,
-      phone: one.phone,
-      adminMenu: true,
+      phones: one.phones,
+      configMenu: true,
+      productsPerPage: one.productsPerPage,
       csrfToken: req.csrfToken()
     }))
-    .catch(err => res.redirect('/'));
+    .catch(err => next(err));
+});
+
+router.post('/phones', (req, res, next) => {
+  var phone = req.body.phone;
+  Config.findOneAndUpdate({}, {
+    $push: {
+      phones: {
+        phone: phone
+      }
+    }
+  }).then(updResult => {
+    res.redirect('/admin/config');
+  }).catch(err => next(err));
+});
+
+router.post('/phones/:id', (req, res, next) => {
+  var phone = req.body.phone;
+  if (phone.length === 0) {
+    Config.findOneAndUpdate({}, {
+      $pull: {
+        phones: {
+          _id: req.params.id
+        }
+      }
+    }).then(remResult => {
+      next();
+    }).catch(err => next(err));
+  } else {
+    Config.findOneAndUpdate({
+      'phones._id': req.params.id
+    }, {
+      $set: {
+        'phones.$.phone': phone
+      }
+    }).then(updResult => {
+      next();
+    }).catch(err => next(err));
+  }
+}, (req, res, next) => {
+  res.redirect('/admin/config');
 });
 
 /* POST admin. */
@@ -61,8 +127,9 @@ router.post('/', function (req, res, next) {
       one.address = conf.address;
       one.description = conf.description;
       one.phone = conf.phone;
+      one.productsPerPage = conf.productsPerPage;
       one.save()
-        .then(savedOne => res.redirect('/admin'))
+        .then(savedOne => res.redirect('/admin/config'))
         .catch(err => {
           req.flash('error', 'Не удалось сохранить данные.');
           res.redirect('/admin');
@@ -74,57 +141,17 @@ router.post('/', function (req, res, next) {
     });
 });
 
-/* GET Admin Orders page. */
-router.get('/orders', function (req, res, next) {
-  Order.find()
-    .then(orders => {
-      res.render('admin/orders', {
-        orders: orders,
-        ordersMenu: true
-      });
-    });
-});
-
 router.get('/order/:id', (req, res, next) => {
+  OrderState.find().then(states => {
+    res.locals.states = states;
+    next();
+  }).catch(err => next(err));
+}, (req, res, next) => {
   Order.findById(req.params.id)
     .then(order => {
       res.locals.order = order;
-      switch (order.status) {
-        case 0:
-            res.locals.status = 'Отправлено на рассмотрение';
-            break;
-        case 1:
-          res.locals.status = 'Обрабатывается';
-          break;
-        case 2:
-          res.locals.status = 'На складе';
-          break;
-        case 3:
-          res.locals.status = 'Отправлен';
-          break;
-        case 4:
-          res.locals.status = 'Получен';
-          break;
-        case 5:
-          res.locals.status = 'Отказ';
-          break;
-      };
-      var shippingFields = [];
-      var done = 0;
-      order.shippingFieldData.forEach(data => {
-        ShippingField.findById(data.fieldId)
-          .then(f => {
-            shippingFields.push({
-              name: f.name,
-              data: data.fieldValue
-            });
-            done++;
-            if (done === order.shippingFieldData.length) {
-              res.locals.shippingFields = shippingFields;
-              next();
-            }
-          });
-      });
+      order.date = moment(mongoose.Types.ObjectId(order._id).getTimestamp()).calendar();
+      next();
     });
 }, (req, res, next) => {
   Guarantee.find({
@@ -153,16 +180,13 @@ router.post('/order/:id/notes', (req, res, next) => {
   });
 });
 
-router.post('/order/:id/status', (req, res, next) => {
-  var updateOrder = {};
-  updateOrder.status = parseInt(req.body.statusSelect);
-  if (updateOrder.status === 4) {
-    updateOrder.reciveDate = new Date();
-  }
-  Order.findByIdAndUpdate(req.params.id, updateOrder)
-    .then(updateResult => {
-      res.redirect('/admin/order/' + req.params.id);
-    });
+router.post('/order/:id/state', (req, res, next) => {
+  var state = req.body.state;
+  Order.findByIdAndUpdate(req.params.id, {
+    state: state
+  }).then(updResult => {
+    res.redirect('/admin/order/' + req.params.id);
+  }).catch(err => next(err));
 });
 
 router.post('/guarantees', (req, res, next) => {
@@ -248,31 +272,17 @@ router.post('/order/:orderId/guarantee/:guaranteeId', (req, res, next) => {
 });
 
 router.get('/home', (req, res, next) => {
-  res.locals.title = 'Панель управления / Состояние - ' + res.locals.shopTitle;
-  res.render('admin/home', {
-    homeMenu: true
-  });
-});
-
-router.get('/reviews', (req, res, next) => {
-  Review.update({
-      checked: false
-    }, {
-      checked: true
+  Order.find({
+      status: {
+        $exists: false
+      }
+    }).count().then(orders => {
+      res.locals.title = 'Панель управления / Состояние - ' + res.locals.shopTitle;
+      res.render('admin/home', {
+        homeMenu: true
+      });
     })
-    .then(updateResult => {
-      Review.find().populate('user').sort({
-          _id: -1
-        })
-        .then(reviews => {
-          req.user.reviewsLastVisit = Date.now();
-          res.locals.title = 'Панель управления / Отзывы - ' + res.locals.shopTitle;
-          res.locals.reviews = reviews;
-          res.locals.reviewsMenu = true;
-          res.render('admin/reviews');
-        })
-        .catch(err => next(err));
-    }).catch(err => next(err));
+    .catch(err => next(err));
 });
 
 module.exports = router;

@@ -1,8 +1,15 @@
 <div>
     {{#each categories}}
-    <a href="/category/{{this._id}}" class="text-info">{{name}}</a>
-    <div class="ml-3">
+    <div class="d-flex justify-content-between">
+        <a href="/category/{{this._id}}" class="text-dark">{{name}}</a>
+        {{#if categories}}
+        <a class="text-dark" data-toggle="collapse" href="#{{name}}" role="button" aria-expanded="false">
+            <i class="fas fa-chevron-down"></i>
+        </a>{{/if}}
+    </div>
+    {{#if categories}}
+    <div id="{{name}}" class="ml-2 collapse">
         {{> categories}}
     </div>
-    {{/each}}
+    {{/if}} {{/each}}
 </div>

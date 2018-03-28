@@ -3,12 +3,14 @@
         {{> adminNavigation}}
     </div>
     <div class="col-12 col-lg-6">
-        <h2>.xlsx парсер Инфотех</h2>
+        <h2>Парсер Инфотех</h2>
+        <hr>
+        <p>Файл должен быть в формате <span class="font-weight-bold text-danger">.xlsm</span>. Для этого необходимо открыть файл <span class="font-weight-bold">Price_Infotech_foto.xlsx</span> в офисном приложении (<a href="https://www.libreoffice.org/download/download/" class="text-success">LibreOffice Calc</a>, например), затем в диалоге "Сохранить как.." выбрать формат <span class="font-weight-bold">.xlsm</span>.</p>
         <hr>
         <form action="/admin/parser?_csrf={{csrfToken}}" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="_csrf" value="{{ csrfToken }}">
             <div class="form-group">
-                <label for="productImage">Выберите файл <span class="text-success font-weight-bold">Price_Infotech_Partner.xlsx</span></label>
+                <label for="productImage">Выберите файл <span class="text-success font-weight-bold">Price_Infotech_foto.xlsm</span></label>
                 <input type="file" class="form-control-file" id="xlsx" name="xlsx">
             </div>
             <button class="btn btn-success" type="submit">Отправить</button>

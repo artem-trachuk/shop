@@ -2,13 +2,20 @@ var express = require('express');
 var router = express.Router();
 
 var Shipping = require('../../models/shipping');
+var OrderState = require('../../models/orderState');
 
 var csrf = require('csurf');
 router.use(csrf());
 
 router.get('/', (req, res, next) => {
+    OrderState.find().then(states => {
+        res.locals.states = states;
+        next();
+    }).catch(err => next(err));
+}, (req, res, next) => {
     res.locals.title = 'Панель управления / Шаблоны доставки - ' + res.locals.shopTitle;
     res.locals.shippingMenu = true;
+    res.locals.csrfToken = req.csrfToken();
     next();
 }, (req, res, next) => {
     Shipping.find()
@@ -79,7 +86,10 @@ router.post('/editor/:id/change-field/:fieldId', (req, res, next) => {
     var field = req.body.field;
     var isRequired = req.body.isRequired === 'on' ? true : false;
     if (field.length > 0) {
-        Shipping.findOneAndUpdate({_id: req.params.id, 'fields._id': req.params.fieldId}, {
+        Shipping.findOneAndUpdate({
+            _id: req.params.id,
+            'fields._id': req.params.fieldId
+        }, {
             $set: {
                 'fields.$.field': field,
                 'fields.$.required': isRequired
@@ -98,6 +108,30 @@ router.post('/editor/:id/change-field/:fieldId', (req, res, next) => {
             res.redirect('/admin/shipping/editor/' + req.params.id);
         }).catch(err => next(err));
     }
+});
+
+router.post('/state', (req, res, next) => {
+    var state = req.body;
+    OrderState.create({
+        title: state.title
+    }).then(createResult => {
+        res.redirect('/admin/shipping');
+    }).catch(err => next(err));
+});
+
+router.post('/state/:id', (req, res, next) => {
+    var state = req.body;
+    if (state.title.length === 0) {
+        OrderState.findByIdAndRemove(req.params.id).then(next()).catch(err => next(err));
+    } else {
+        OrderState.findByIdAndUpdate(req.params.id, {
+            title: state.title
+        }).then(updResult => {
+            next();
+        }).catch(err => next(err));
+    }
+}, (req, res, next) => {
+    res.redirect('/admin/shipping');
 });
 
 module.exports = router;

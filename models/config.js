@@ -13,7 +13,15 @@ var configSchema = new mongoose.Schema({
         type: String,
         default: 'магазин сетевого оборудования от специалистов, которые с ним работают'
     },
-    phone: String
+    phones: {
+        type: [{
+            phone: String
+        }]
+    },
+    productsPerPage: {
+        type: Number,
+        default: 20
+    }
 });
 
 module.exports = mongoose.model('Config', configSchema);

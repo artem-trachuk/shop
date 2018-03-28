@@ -1,7 +1,26 @@
 {{> search}}
 <div class="row">
+  <div class="col-12">
+    <h3 class="text-center mb-5">{{categoryName}}</h3>
+  </div>
   <div class="col-12 col-lg-3">
-    {{> categories}}
+    <div id="accordion">
+      <div class="card">
+        <div class="card-header" id="headingOne">
+          <h5 class="mb-0">
+            <button class="btn btn-link" data-toggle="collapse" data-target="#categories" aria-expanded="true" aria-controls="categories">
+              <i class="fas fa-chevron-down"></i> Категории
+            </button>
+          </h5>
+        </div>
+
+        <div id="categories" class="collapse" aria-labelledby="categories" data-parent="#accordion">
+          <div class="card-body">
+            {{> categories}}
+          </div>
+        </div>
+      </div>
+    </div>
     {{> filters}}
   </div>
   <div class="col-12 col-lg-9">

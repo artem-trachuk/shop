@@ -5,7 +5,7 @@
             <tbody>
                 <tr>
                     <td class="font-weight-bold">Дата заказа</td>
-                    <td>{{showDate order.orderDate}}</td>
+                    <td>{{order.date}}</td>
                 </tr>
                 {{#if order.reciveDate}}
                 <tr>
@@ -15,7 +15,11 @@
                 {{/if}}
                 <tr>
                     <td class="font-weight-bold">Статус заказа</td>
-                    <td>{{status}}</td>
+                    {{#if order.state}}
+                    <td>{{order.state}}</td>
+                    {{else}}
+                    <td class="font-italic text-secondary">(не указан)</td>
+                    {{/if}}
                 </tr>
                 <tr>
                     <td class="font-weight-bold">Номер заказа</td>

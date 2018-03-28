@@ -37,7 +37,6 @@
         <div class="w-100"></div>
         <div class="col-12">
           <p class="my-0">{{shopAddress}}</p>
-          <p class="my-0">{{shopNumber}}</p>
         </div>
       </div>
     </div>
@@ -48,17 +47,3 @@
     </div>
   </div>
 </div>
-<script>
-  $(function () {
-    $('#sendReview').click(function (e) {
-      $.ajax({
-        url: '/review',
-        type: 'POST',
-        data: {
-          review: $('#reviewTextarea').val()
-        },
-        success: () => { $('#reviewTextarea').val(''); }
-      });
-    });
-  });
-</script>

@@ -1,7 +1,7 @@
 <div class="list-group mb-4">
     <a href="/admin/home" class="list-group-item list-group-item-action {{#if homeMenu}}active{{/if}}"><i class="fas fa-home"></i> Состояние</a>
-    <a href="/admin/orders" class="list-group-item list-group-item-action {{#if ordersMenu}}active{{/if}}"><i class="fas fa-truck"></i> Заказы <span class="badge badge-primary">3</span></a>
-    <a href="/admin/reviews" class="list-group-item list-group-item-action {{#if reviewsMenu}}active{{/if}}"><i class="fas fa-comment"></i> Отзывы <span class="badge badge-primary">{{reviewsCounter}}</span></a>
+    <a href="/admin/orders" class="list-group-item list-group-item-action {{#if ordersMenu}}active{{/if}}"><i class="fas fa-truck"></i> Заказы <span class="badge badge-primary">{{ordersCount}}</span></a>
+    <a href="/admin/reviews" class="list-group-item list-group-item-action {{#if reviewsMenu}}active{{/if}}"><i class="fas fa-comment"></i> Отзывы</a>
     <a href="/admin/guarantees" class="list-group-item list-group-item-action {{#if guaranteesMenu}}active{{/if}}"><i class="far fa-list-alt"></i> Гарантии</a>
     </div>
 <div class="list-group mb-4">
@@ -12,6 +12,6 @@
     <a href="/admin/payment" class="list-group-item list-group-item-action {{#if paymentMenu}}active{{/if}}"><i class="fas fa-dollar-sign"></i> Шаблоны оплаты</a>
     </div>
 <div class="list-group mb-4">
-    <a href="/admin/parser" class="list-group-item list-group-item-action {{#if parserMenu}}active{{/if}}"><i class="fas fa-download"></i> .xlsx парсер Инфотех</a>
-    <a href="/admin/" class="list-group-item list-group-item-action {{#if adminMenu}}active{{/if}}"><i class="fas fa-cogs"></i> Настройка</a>
+    <a href="/admin/parser" class="list-group-item list-group-item-action {{#if parserMenu}}active{{/if}}"><i class="fas fa-download"></i> Парсер Инфотех</a>
+    <a href="/admin/config" class="list-group-item list-group-item-action {{#if configMenu}}active{{/if}}"><i class="fas fa-cogs"></i> Настройка</a>
 </div>

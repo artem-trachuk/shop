@@ -1,7 +1,32 @@
 <div class="row">
     <div class="col-12 col-lg-6 offset-lg-3">
         <h2>{{profile.displayName}}</h2>
-        {{#each orders}} <a href="/cart/order/{{_id}}">{{showDate orderDate}}</a> {{/each}}
+        <h5>Заказы</h5>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Создан</th>
+                    <th scope="col">Состояние</th>
+                    <th scope="col">Стоимость</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each orders}}
+                <tr>
+                    <td>
+                        <a href="/cart/order/{{_id}}">{{date}}</a>
+                    </td>
+                    {{#if state}}
+                    <td>{{state}}</td>
+                    {{else}}
+                    <td class="font-italic text-secondary">(не указан)</td>
+                    {{/if}}
+                    <td>{{cart.totalPrice}} грн</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+
         <a class="btn btn-warning btn-sm" href="/user/logout">Выйти
             <i class="fas fa-sign-out-alt"></i>
         </a>

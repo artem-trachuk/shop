@@ -13,6 +13,7 @@ var session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 var passport = require('passport');
 var flash = require('connect-flash');
+var helpers = require('handlebars-helpers')();
 
 var Config = require('./models/config');
 var User = require('./models/user');
@@ -22,11 +23,10 @@ var Review = require('./models/review');
 var index = require('./routes/index');
 var category = require('./routes/category');
 var cart = require('./routes/cart');
-var admin = require('./routes/admin');
+var admin = require('./routes/admin/index');
 var user = require('./routes/user');
 var product = require('./routes/admin/product');
 var adminCategory = require('./routes/admin/category');
-var shippingAndPayment = require('./routes/admin/shipping-and-payment');
 var shipping = require('./routes/admin/shipping');
 var payment = require('./routes/admin/payment');
 var deleteData = require('./routes/admin/delete');
@@ -67,35 +67,14 @@ hbs.registerHelper('optionHelper', (selectedValue, selectValue) => {
   return;
 });
 
+hbs.registerHelper('ellipsis', helpers.ellipsis);
+
 // register hbs helper (show selected filters)
 hbs.registerHelper('filterSelected', (query, name, fieldvalue) => {
   if (Object.keys(query).length > 0 && query[name]) {
     if (query[name].indexOf(fieldvalue) > -1) {
       return 'checked';
     }
-  }
-});
-
-hbs.registerHelper('statusSwitch', (status) => {
-  switch (status) {
-    case 0:
-      return 'Отправлено на рассмотрение';
-      break;
-    case 1:
-      return 'Обрабатывается';
-      break;
-    case 2:
-      return 'На складе';
-      break;
-    case 3:
-      return 'Отправлен';
-      break;
-    case 4:
-      return 'Получен';
-      break;
-    case 5:
-      return 'Отказ';
-      break;
   }
 });
 
@@ -151,7 +130,7 @@ app.get('*', (req, res, next) => {
       res.locals.shopTitle = conf.title;
       res.locals.shopDescription = conf.description;
       res.locals.shopAddress = conf.address;
-      res.locals.shopNumber = conf.phone;
+      res.locals.shopPhones = conf.phones;
       next();
     });
 });
@@ -167,20 +146,11 @@ app.use('/', index);
 app.use('/category', category);
 app.use('/cart', cart);
 app.use('/user', user);
-app.use('/admin', (req, res, next) => {
-  Review.count({ checked: false })
-    .then(counter => {
-      res.locals.reviewsCounter = counter;
-      next();
-    })
-    .catch(err => next(err));
-})
 app.use('/admin', admin);
 app.use('/admin/product', product);
 app.use('/admin/category', adminCategory);
 app.use('/admin/shipping', shipping);
 app.use('/admin/payment', payment);
-app.use('/admin/shipping-and-payment', shippingAndPayment);
 app.use('/admin/delete', deleteData);
 app.use('/admin/parser', infotechParser)
 

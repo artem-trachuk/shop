@@ -28,13 +28,23 @@ var Order = require('../models/order');
 var Category = require('../models/category');
 var Field = require('../models/field');
 var User = require('../models/user');
+var Shipping = require('../models/shipping');
+var Payment = require('../models/payment');
 
 var buildCategories = require('./helpers/buildCategories');
 
 /* GET home page. */
-router.get('/', function (req, res, next) {
+router.get('/', (req, res, next) => {
+  Config.findOne().then(config => {
+    res.locals.productsPerPage = config.productsPerPage;
+    next();
+  }).catch(err => next(err));
+}, function (req, res, next) {
   // find all products which have at least one category
-  Product.find()
+  var page = req.query.page ? parseInt(req.query.page) : 1;
+  Product.find().sort({
+      _id: -1
+    }).skip(res.locals.productsPerPage * (page - 1)).limit(res.locals.productsPerPage)
     .then(products => {
       res.locals.products = products;
       next();
@@ -44,13 +54,13 @@ router.get('/', function (req, res, next) {
       next();
     });
 }, buildCategories, (req, res, next) => {
-  req.session.callbackUrl = '/';
-  res.locals.title = res.locals.shopTitle + ' - магазин сетевого оборудования от специалистов, которые с ним работают';
-  res.locals.prevPageIndex = 0;
-  res.locals.prevPageDisabled = true;
-  res.locals.nextPageIndex = 2;
-  res.locals.nextPageDisabled = false;
-  res.render('index');
+  Product.count().then(count => {
+    var page = req.query.page ? parseInt(req.query.page) : 1;
+    req.session.callbackUrl = '/';
+    res.locals.title = res.locals.shopTitle + ' - магазин сетевого оборудования от специалистов, которые с ним работают';
+    require('./helpers/buildPagination')(res.locals, page, count, res.locals.productsPerPage);
+    res.render('index');
+  }).catch(err => next(err));
 });
 
 /* GET Products by Search query */
@@ -112,7 +122,8 @@ router.get('/product/:id', (req, res, next) => {
           })
           .catch(err => next(err));
       });
-    });
+    })
+    .catch(err => next(err));
 }, (req, res, next) => {
   res.render('product');
 });
@@ -159,6 +170,29 @@ router.get('/fb-callback', passport.authenticate('fb-signin', {
   }
 }, (req, res, next) => {
   res.redirect('/');
+});
+
+router.get('/shipping-and-payment', (req, res, next) => {
+  Shipping.find({
+      show: true
+    })
+    .then(allShipping => {
+      res.locals.shipping = allShipping;
+      next();
+    })
+    .catch(err => next(err));
+}, (req, res, next) => {
+  Payment.find({
+      show: true
+    })
+    .then(allPayment => {
+      res.locals.payment = allPayment;
+      next();
+    })
+    .catch(err => next(err));
+}, (req, res, next) => {
+  res.locals.title = 'Способы доставки и оплаты - ' + res.locals.shopTitle;
+  res.render('shipping-and-payment');
 });
 
 module.exports = router;

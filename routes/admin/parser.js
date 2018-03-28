@@ -6,7 +6,9 @@ var storage = multer.memoryStorage();
 var upload = multer({
     storage: storage
 });
+var fs = require('fs');
 var xlsx = require('node-xlsx').default;
+var lsXlsx = require('ls-xlsx');
 
 var csrf = require('csurf');
 router.use(csrf());
@@ -14,8 +16,27 @@ router.use(csrf());
 var Category = require('./../../models/category');
 var Product = require('./../../models/product');
 var Counter = require('../../models/counter');
+var Field = require('./../../models/field');
 
 router.get('/', (req, res, next) => {
+    Field.findOne({
+            name: 'Производитель'
+        })
+        .then(field => {
+            if (!field) {
+                Field.create({
+                        name: 'Производитель'
+                    })
+                    .then(createResult => {
+                        next();
+                    })
+                    .catch(err => next(err));
+            } else {
+                next();
+            }
+        })
+        .catch(err => next(err));
+}, (req, res, next) => {
     res.locals.title = 'Панель управления / Парсер - ' + res.locals.shopTitle;
     res.locals.parserMenu = true;
     res.locals.csrfToken = req.csrfToken();
@@ -27,11 +48,28 @@ router.post('/', upload.single('xlsx'), (req, res, next) => {
         req.flash('errors', 'Выберите файл!');
         return res.redirect('/admin/parser');
     }
-    if (req.file.originalname !== 'Price_Infotech_Partner.xlsx') {
+    if (req.file.originalname !== 'Price_Infotech_foto.xlsm') {
         req.flash('errors', 'Неправильный файл! Загрузите файл с названием Price_Infotech_Partner.xlsx.');
         return res.redirect('/admin/parser');
     }
     const parsedBuffer = xlsx.parse(req.file.buffer)[0].data;
+    if (parsedBuffer[7][0] !== '№' ||
+        parsedBuffer[7][1] !== 'Код' ||
+        parsedBuffer[7][2] !== 'Производитель' ||
+        parsedBuffer[7][3] !== 'Изображение' ||
+        parsedBuffer[7][4] !== 'Номенклатура' ||
+        parsedBuffer[7][5] !== 'Наименование' ||
+        parsedBuffer[7][6] !== 'Наличие' ||
+        parsedBuffer[7][7] !== 'Наличие NBD' ||
+        parsedBuffer[7][8] !== 'Гарантия' ||
+        parsedBuffer[7][9] !== '0.Розн.Грн.(РРЦ)' ||
+        parsedBuffer[7][10] !== '1.Розн.$ (РРЦ)') {
+            req.flash('errors', 'Обнаружены изменения в структуре файла, парсинг невозможен.');
+            return res.redirect('/admin/parser');
+        }
+    const lsParsedBuffer = lsXlsx.read(req.file.buffer);
+    const firstSheetName = lsParsedBuffer.SheetNames[0];
+    const parsedImages = lsParsedBuffer.Sheets[firstSheetName]['!images'];
     var done = 0;
     var categories = [];
     var addedCategories = 0;
@@ -54,15 +92,24 @@ router.post('/', upload.single('xlsx'), (req, res, next) => {
                     })
                     .then(one => {
                         if (!one) {
-                            Category.create({
-                                    name: categoryName
-                                }).then(createResult => {
-                                    categories.push({
-                                        index: index,
-                                        category: createResult
-                                    });
-                                    addedCategories++;
-                                    checkDone();
+                            Field.findOne({
+                                    name: 'Производитель'
+                                })
+                                .then(field => {
+                                    if (field) {
+                                        Category.create({
+                                                name: categoryName,
+                                                fields: [field._id]
+                                            }).then(createResult => {
+                                                categories.push({
+                                                    index: index,
+                                                    category: createResult
+                                                });
+                                                addedCategories++;
+                                                checkDone();
+                                            })
+                                            .catch(err => next(err));
+                                    }
                                 })
                                 .catch(err => next(err));
                         } else {
@@ -94,17 +141,17 @@ router.post('/', upload.single('xlsx'), (req, res, next) => {
         for (var i = 0; i < parsedBuffer.length; i++) {
             (function (index) {
                 // product
-                if (parsedBuffer[index].length >= 9) {
+                if (parsedBuffer[index].length >= 10) {
                     if (parsedBuffer[index][0] === 'Группа' || parsedBuffer[index][0] === '№' || parsedBuffer[index][0] === undefined) {
                         checkProductsDone();
                     } else {
                         var product = parsedBuffer[index];
                         Product.findOne({
-                                title: product[3]
+                                title: product[4]
                             })
                             .then(one => {
                                 if (!one) {
-                                    if (product[5] === 'Нет') {
+                                    if (product[6] === 'Нет' && product[7] === 'Нет') {
                                         return checkProductsDone();
                                     }
                                     Counter.findOneAndUpdate({
@@ -115,21 +162,45 @@ router.post('/', upload.single('xlsx'), (req, res, next) => {
                                         var sortedCategories = categories.sort((a, b) => a.index < b.index ? -1 : 1);
                                         var smallerCategories = sortedCategories.filter((v, i) => v.index < index ? true : false);
                                         var category = smallerCategories[smallerCategories.length - 1].category;
-                                        Product.create({
-                                                article: counter.product,
-                                                title: product[3],
-                                                description: product[4],
-                                                price: product[8],
-                                                USDprice: product[9],
-                                                categories: [category]
-                                            }).then(createResult => {
-                                                addedProducts++;
-                                                checkProductsDone();
+                                        var cell = 'C' + (index);
+                                        var image = parsedImages.find(v => v.fromCell === cell);
+                                        if (image) {
+                                            var buffer = image.data().asNodeBuffer();
+                                            var imageName = '/uploads/' + image.name;
+                                            fs.writeFile(`${conf.dest}/${image.name}`, buffer)
+                                            .then(writeResult => {
+
+                                            })
+                                            .catch(err => next(err));
+                                        }
+                                        Field.findOne({
+                                                name: 'Производитель'
+                                            })
+                                            .then(field => {
+                                                if (field) {
+                                                    Product.create({
+                                                            article: counter.product,
+                                                            title: product[4],
+                                                            description: product[5],
+                                                            price: product[9],
+                                                            USDprice: product[10],
+                                                            categories: [category],
+                                                            imagePath: imageName ? imageName : undefined,
+                                                            data: [{
+                                                                field: field._id,
+                                                                fieldValue: product[2]
+                                                            }]
+                                                        }).then(createResult => {
+                                                            addedProducts++;
+                                                            checkProductsDone();
+                                                        })
+                                                        .catch(err => next(err));
+                                                }
                                             })
                                             .catch(err => next(err));
                                     }).catch(err => next(err));
                                 } else {
-                                    if (product[5] === 'Нет') {
+                                    if (product[6] === 'Нет' && product[7] === 'Нет') {
                                         Product.findByIdAndRemove(one._id)
                                             .then(removeResult => {
                                                 removedProducts++;
@@ -138,15 +209,15 @@ router.post('/', upload.single('xlsx'), (req, res, next) => {
                                             .catch(err => next(err));
                                     } else {
                                         Product.findByIdAndUpdate(one.id, {
-                                            title: product[3],
-                                            description: product[4],
-                                            price: product[8],
-                                            USDprice: product[9]
-                                        }).then(updateResult => {
-                                            updatedProducts++;
-                                            checkProductsDone();
-                                        })
-                                        .catch(err => next(err));
+                                                title: product[4],
+                                                description: product[5],
+                                                price: product[9],
+                                                USDprice: product[10]
+                                            }).then(updateResult => {
+                                                updatedProducts++;
+                                                checkProductsDone();
+                                            })
+                                            .catch(err => next(err));
                                     }
                                 }
                             })

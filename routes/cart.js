@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
-
+var moment = require('moment');
+moment.locale('ru');
+var mongoose = require('mongoose');
 var csrf = require('csurf');
 router.use(csrf());
 
@@ -9,7 +11,6 @@ var Product = require('../models/product');
 var Order = require('../models/order');
 var Payment = require('../models/payment');
 var Shipping = require('../models/shipping');
-var ShippingField = require('../models/shipping-field');
 var User = require('../models/user');
 var Counter = require('../models/counter');
 
@@ -93,17 +94,15 @@ router.post('/checkout', (req, res, next) => {
     const shippingId = req.session.shippingId;
     const paymentId = req.session.paymentId;
     var fields = req.body;
-    fieldsLength = Object.keys(fields).length;
-    var done = 0;
     var order = new Order();
-    order.orderDate = new Date();
     order.user = req.user;
     order.cart = req.cart;
+    order.clientsNote = req.body.clientsNote;
     Counter.findOneAndUpdate({
-        $inc: {
-            order: 1
-        }
-    })
+            $inc: {
+                order: 1
+            }
+        })
         .then(counter => {
             order.article = counter.order;
             return Shipping.findById(shippingId);
@@ -148,10 +147,10 @@ router.post('/checkout', (req, res, next) => {
 }, (req, res, next) => {
     if (req.user) {
         User.findByIdAndUpdate(req.user.id, {
-            $unset: {
-                cart: ""
-            }
-        })
+                $unset: {
+                    cart: ""
+                }
+            })
             .then(updRes => {
                 next();
             });
@@ -191,11 +190,12 @@ router.get('/order/:id', (req, res, next) => {
         }
     } else if (req.user) {
         Order.findOne({
-            user: req.user.id,
-            _id: req.params.id
-        })
+                user: req.user.id,
+                _id: req.params.id
+            })
             .then(order => {
                 if (order) {
+                    order.date = moment(mongoose.Types.ObjectId(order._id).getTimestamp()).format("MMM Do YY");
                     res.locals.order = order;
                     next();
                 } else {
@@ -205,28 +205,6 @@ router.get('/order/:id', (req, res, next) => {
     } else {
         showError();
     }
-}, (req, res, next) => {
-    switch (res.locals.order.status) {
-        case 0:
-            res.locals.status = 'Отправлено на рассмотрение';
-            break;
-        case 1:
-            res.locals.status = 'Обрабатывается';
-            break;
-        case 2:
-            res.locals.status = 'На складе';
-            break;
-        case 3:
-            res.locals.status = 'Отправлен';
-            break;
-        case 4:
-            res.locals.status = 'Получен';
-            break;
-        case 5:
-            res.locals.status = 'Отказ';
-            break;
-    };
-    next();
 }, (req, res, next) => {
     res.locals.title = 'Заказ ' + res.locals.order.article + ' - ' + res.locals.shopTitle;
     res.render('order');
@@ -272,8 +250,8 @@ router.get('/add-to-cart/:id', function (req, res, next) {
             Cart.add(req.cart, product);
             if (req.user) {
                 User.findByIdAndUpdate(req.user.id, {
-                    cart: req.cart
-                })
+                        cart: req.cart
+                    })
                     .then(updResult => {
                         next();
                     })
@@ -303,17 +281,17 @@ router.get('/remove-from-cart/:id', (req, res, next) => {
     if (req.user) {
         if (req.cart.totalQty === 0) {
             User.findByIdAndUpdate(req.user.id, {
-                $unset: {
-                    cart: ""
-                }
-            })
+                    $unset: {
+                        cart: ""
+                    }
+                })
                 .then(updResult => {
                     next();
                 });
         } else {
             User.findByIdAndUpdate(req.user.id, {
-                cart: req.cart
-            })
+                    cart: req.cart
+                })
                 .then(updResult => {
                     next();
                 });

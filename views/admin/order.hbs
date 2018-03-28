@@ -14,61 +14,139 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-12 col-lg-6">
+    <div class="col-12 col-lg-8 offset-lg-2">
         <div class="row">
             <div class="col-12">
                 <table class="table bg-light">
                     <tbody>
                         <tr>
                             <td class="font-weight-bold">Дата заказа</td>
-                            <td>{{showDate order.orderDate}}</td>
+                            <td>{{order.date}}</td>
                         </tr>
                         {{#if order.reciveDate}}
                         <tr>
                             <td class="font-weight-bold">Дата получения</td>
-                            <td>{{showDate order.reciveDate}}</td>
+                            <td>{{order.reciveDate}}</td>
                         </tr>
                         {{/if}}
                         <tr>
                             <td class="font-weight-bold">Статус заказа</td>
-                            <td>{{status}}</td>
+                            <td>{{order.state}}</td>
                         </tr>
                         <tr>
-                            <td colspan="2">
-                                <span class="text-info font-weight-bold float-right">Доставка</span>
+                            <td class="font-weight-bold">Примечание</td>
+                            <td>{{order.clientsNote}}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="text-center">
+                                <span class="text-info font-weight-bold ">Доставка ({{order.shipping.name}})</span>
                             </td>
                         </tr>
-                        {{#each shippingFields}}
+                        {{#each order.shipping.fields}}
                         <tr>
                             <td>
-                                <strong>{{this.name}}</strong>
+                                <strong>{{field}}</strong>
                             </td>
-                            <td>{{this.data}} </td>
+                            <td>{{value}} </td>
+                        </tr>
+                        {{/each}}
+                        <tr>
+                            <td colspan="2" class="text-center">
+                                <span class="text-info font-weight-bold">Оплата ({{order.payment.name}})</span>
+                            </td>
+                        </tr>
+                        {{#each order.payment.fields}}
+                        <tr>
+                            <td>
+                                <strong>{{field}}</strong>
+                            </td>
+                            <td>{{value}} </td>
+                        </tr>
+                        {{/each}}
+                        <tr>
+                            <td>
+                                <strong>Изменить статус</strong>
+                            </td>
+                            <td>
+                                <form action="/admin/order/{{order.id}}/state/" method="POST">
+                                    <div class="form-group">
+                                        <select class="form-control" id="state" name="state">
+                                            {{#each states}}
+                                            <option value="{{title}}">{{title}}</option>
+                                            {{/each}}
+                                        </select>
+                                    </div>
+                                    <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                                    <button type="submit" class="btn btn-primary btn-sm float-right">Изменить</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-12">
+                <h4 class="float-right">Товары</h4>
+                <table class="table">
+                    <tbody>
+                        {{#each order.cart.products }}
+                        <tr>
+                            <td>{{product.title}}</td>
+                            <td>{{qty}}</td>
+                            <td>{{price}} грн.</td>
+                            <td>
+                                <form class="form-inline" action="/admin/guarantees" method="POST">
+                                    <div class="form-group">
+                                        <input type="text" name="serial" class="form-control mr-lg-1" placeholder="Серийный номер">
+                                        <input type="hidden" name="order" value="{{../order.id}}">
+                                        <input type="hidden" name="productTitle" value="{{product.title}}">
+                                        <input type="hidden" name="product" value="{{product.id}}">
+                                        <input type="hidden" name="_csrf" value="{{ ../csrfToken }}">
+                                        <button type="submit" class="btn btn-primary btn-sm">Добавить</button>
+                                    </div>
+                                </form>
+                            </td>
                         </tr>
                         {{/each}}
                     </tbody>
                 </table>
-                <form action="/admin/order/{{order.id}}/status/" method="POST">
-                    <div class="form-group">
-                        <label for="statusSelect">Изменить статус</label>
-                        <select class="form-control" id="statusSelect" name="statusSelect">
-                            <option value="1">Обрабатывается</option>
-                            <option value="2">На складе</option>
-                            <option value="3">Отправлен</option>
-                            <option value="4">Получен</option>
-                            <option value="5">Отказ</option>
-                        </select>
-                    </div>
-                    <input type="hidden" name="_csrf" value="{{ csrfToken }}">
-                    <button type="submit" class="btn btn-primary btn-sm float-right">Изменить</button>
-                </form>
+                <h5>Общая цена {{order.cart.totalPrice}}</h5>
+                {{#if guarantees}}
+                <h3>Гарантии</h3>
+                <table class="table">
+                    <thead>
+                        <th scope="col">Товар</th>
+                        <th scope="col">Серийный номер</th>
+                    </thead>
+                    <tbody>
+                        {{#each guarantees}}
+                        <tr>
+                            <td>
+                                <a href="/product/{{this.product}}" class="text-dark font-weight-bold">{{productTitle}}</a>
+                            </td>
+                            <td>
+                                <form action="/admin/order/{{../order.id}}/guarantee/{{id}}" method="POST" class="form-inline">
+                                    <div class="form-group mr-2">
+                                        <input type="text" value="{{serial}}" class="form-control" name="serial">
+                                    </div>
+                                    <input type="hidden" name="_csrf" value="{{ ../csrfToken }}">
+                                    <button type="submit" class="btn btn-primary btn-sm">Изменить</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+                {{/if}}
             </div>
         </div>
         <div class="row">
             <div class="col-12">
                 <form action="/admin/order/{{order.id}}/notes" method="POST">
                     <div class="form-group">
-                        <label for="clientNote">Заметка для покупателя</label>
+                        <label for="noteForClient">Заметка для покупателя</label>
                         <textarea class="form-control" id="clientNote" name="clientNote" rows="3">{{order.clientNote}}</textarea>
                         <small>Данную заметку покупатель увидит в своём профиле открыв заказ.</small>
                     </div>
@@ -82,58 +160,5 @@
                 </form>
             </div>
         </div>
-    </div>
-    <div class="col-12 col-lg-6">
-        <h4 class="float-right">Товары</h4>
-        <table class="table">
-            <tbody>
-                {{#each order.cart.products }}
-                <tr>
-                    <td>{{product.title}}</td>
-                    <td>{{qty}}</td>
-                    <td>{{price}} грн.</td>
-                    <td>
-                        <form class="form-inline" action="/admin/guarantees" method="POST">
-                            <div class="form-group">
-                                <input type="text" name="serial" class="form-control mr-lg-1" placeholder="Серийный номер">
-                                <input type="hidden" name="order" value="{{../order.id}}">
-                                <input type="hidden" name="productTitle" value="{{product.title}}">
-                                <input type="hidden" name="product" value="{{product.id}}">
-                                <input type="hidden" name="_csrf" value="{{ ../csrfToken }}">
-                                <button type="submit" class="btn btn-primary btn-sm">Добавить</button>
-                            </div>
-                        </form>
-                    </td>
-                </tr>
-                {{/each}}
-            </tbody>
-        </table>
-        {{#if guarantees}}
-        <h3>Гарантии</h3>
-        <table class="table">
-            <thead>
-                <th scope="col">Товар</th>
-                <th scope="col">Серийный номер</th>
-            </thead>
-            <tbody>
-                {{#each guarantees}}
-                <tr>
-                    <td>
-                        <a href="/product/{{this.product}}" class="text-dark font-weight-bold">{{productTitle}}</a>
-                    </td>
-                    <td>
-                        <form action="/admin/order/{{../order.id}}/guarantee/{{id}}" method="POST" class="form-inline">
-                            <div class="form-group mr-2">
-                                <input type="text" value="{{serial}}" class="form-control" name="serial">
-                            </div>
-                            <input type="hidden" name="_csrf" value="{{ ../csrfToken }}">
-                            <button type="submit" class="btn btn-primary btn-sm">Изменить</button>
-                        </form>
-                    </td>
-                </tr>
-                {{/each}}
-            </tbody>
-        </table>
-        {{/if}}
     </div>
 </div>
