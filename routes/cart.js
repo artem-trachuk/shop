@@ -46,6 +46,9 @@ router.get('/', (req, res, next) => {
     }
 }, (req, res, next) => {
     var done = 0;
+    if (!res.locals.products) {
+        return next();
+    }
     var length = Object.keys(res.locals.products).length;
     var checkDone = function () {
         done++;
