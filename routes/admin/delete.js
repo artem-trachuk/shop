@@ -19,19 +19,19 @@ router.get('/category/:id', function (req, res, next) {
             res.redirect('/admin/category/' + categoryId);
         } else {
             Category.findByIdAndRemove(categoryId)
-            .then(remRes => {
-                req.flash('success', 'Категория удалена.');
-                return Category.update({
-                    parentCategory: categoryId
-                }, {
-                    $unset: {
-                        parentCategory: ""
-                    }
+                .then(remRes => {
+                    req.flash('success', 'Категория удалена.');
+                    return Category.update({
+                        parentCategory: categoryId
+                    }, {
+                        $unset: {
+                            parentCategory: ""
+                        }
+                    });
+                })
+                .then(remRes => {
+                    res.redirect('/admin/categories');
                 });
-            })
-            .then(remRes => {
-                res.redirect('/admin/categories');
-            });
         }
     });
 });
@@ -41,13 +41,16 @@ router.get('/category/:id', function (req, res, next) {
 /* DELETE Product. */
 router.get('/product/:id', function (req, res, next) {
     productId = req.params.id;
-    Product.findOneAndRemove({
-            _id: productId
-        })
-        .then(remRes => {
-            res.redirect('/admin/products');
-        })
-        .catch(err => next(err));
+    require('../helpers/removeProduct')(productId)
+        .then(removeResult => {
+            Product.findOneAndRemove({
+                    _id: productId
+                })
+                .then(remRes => {
+                    res.redirect('/admin/products');
+                })
+                .catch(err => next(err));
+        }).catch(err => next(err));
 });
 
 module.exports = router;

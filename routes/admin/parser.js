@@ -64,9 +64,9 @@ router.post('/', upload.single('xlsx'), (req, res, next) => {
         parsedBuffer[7][8] !== 'Гарантия' ||
         parsedBuffer[7][9] !== '0.Розн.Грн.(РРЦ)' ||
         parsedBuffer[7][10] !== '1.Розн.$ (РРЦ)') {
-            req.flash('errors', 'Обнаружены изменения в структуре файла, парсинг невозможен.');
-            return res.redirect('/admin/parser');
-        }
+        req.flash('errors', 'Обнаружены изменения в структуре файла, парсинг невозможен.');
+        return res.redirect('/admin/parser');
+    }
     const lsParsedBuffer = lsXlsx.read(req.file.buffer);
     const firstSheetName = lsParsedBuffer.SheetNames[0];
     const parsedImages = lsParsedBuffer.Sheets[firstSheetName]['!images'];
@@ -167,11 +167,7 @@ router.post('/', upload.single('xlsx'), (req, res, next) => {
                                         if (image) {
                                             var buffer = image.data().asNodeBuffer();
                                             var imageName = '/uploads/' + image.name;
-                                            fs.writeFile(`${conf.dest}/${image.name}`, buffer)
-                                            .then(writeResult => {
-
-                                            })
-                                            .catch(err => next(err));
+                                            fs.writeFile(`${conf.dest}/${image.name}`, buffer, (err) => {});
                                         }
                                         Field.findOne({
                                                 name: 'Производитель'
@@ -201,12 +197,15 @@ router.post('/', upload.single('xlsx'), (req, res, next) => {
                                     }).catch(err => next(err));
                                 } else {
                                     if (product[6] === 'Нет' && product[7] === 'Нет') {
-                                        Product.findByIdAndRemove(one._id)
-                                            .then(removeResult => {
-                                                removedProducts++;
-                                                checkProductsDone();
-                                            })
-                                            .catch(err => next(err));
+                                        require('../helpers/removeProduct')(one._id)
+                                            .then(remResult => {
+                                                Product.findByIdAndRemove(one._id)
+                                                    .then(removeResult => {
+                                                        removedProducts++;
+                                                        checkProductsDone();
+                                                    })
+                                                    .catch(err => next(err));
+                                            }).catch(err => next(err));
                                     } else {
                                         Product.findByIdAndUpdate(one.id, {
                                                 title: product[4],

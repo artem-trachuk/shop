@@ -94,8 +94,7 @@ router.post('/:id', upload.single('productImage'), function (req, res, next) {
             doc.description = product.description;
             if (req.file) {
                 if (doc.imagePath) {
-                    imagePath = doc.imagePath.replace('/uploads/', '');
-                    require('fs').unlink(conf.dest + imagePath);
+                    require('../helpers/removeProduct')(doc.id).then(removeResult => {}).catch(err => next(err));
                 }
                 doc.imagePath = '/uploads/' + req.file.filename;
             }
