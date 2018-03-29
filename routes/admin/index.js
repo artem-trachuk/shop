@@ -174,7 +174,7 @@ router.post('/order/:id/notes', (req, res, next) => {
   const notes = req.body;
   Order.findByIdAndUpdate(req.params.id, {
     workingNote: notes.workingNote,
-    clientNote: notes.clientNote
+    noteForClient: notes.noteForClient
   }).then(updateResult => {
     res.redirect('/admin/order/' + req.params.id);
   });

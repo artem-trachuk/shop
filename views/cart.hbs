@@ -1,81 +1,50 @@
 {{#if products}}
-<div class="row">
-    <div class="col-12 col-lg-6">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">Наименование товара</th>
-                    <th scope="col">Количество</th>
-                    <th scope="col">Стоимость</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{#each products}}
-                <tr>
-                    <td>
-                        <a class="text-dark" href="/product/{{product.id}}">
-                            <strong>{{product.title}}</strong>
-                        </a>
-                    </td>
-                    <td>
-                        <a class="text-warning" href="/cart/remove-from-cart/{{product.id}}">
-                            <i class="fas fa-minus"></i></a>
-                        <span class="border text-success p-1 m-1">{{qty}} шт.</span>
-                        <a class="text-success" href="/cart/add-to-cart/{{product.id}}">
-                            <i class="fas fa-plus"></i>
-                        </a>
-                    </td>
-                    <td>{{price}} грн.</td>
-                </tr>
-                {{/each}}
-            </tbody>
-        </table>
-        <h6>Общая стоимость: {{totalPrice}} грн.</h6>
-    </div>
-    <div class="col-12 col-lg-6">
-        <div class="row">
-            <div class="col-12">
-                <form action="/cart" method="POST">
-                    <div class="row">
-                        <div class="form-group col-12 col-lg-6">
-                            <label for="shippingSelect">Способ доставки</label>
-                            <select class="form-control" id="shippingSelect" name="shippingSelect">
-                                {{#each ships}}
-                                <option value="{{id}}">{{name}}</option>
-                                {{/each}}
-                            </select>
-                        </div>
-                        <div class="form-group col-12 col-lg-6">
-                            <label for="paymentSelect">Способ оплаты</label>
-                            <select class="form-control" id="paymentSelect" name="paymentSelect">
-                                {{#each payments}}
-                                <option value="{{id}}">{{name}}</option>
-                                {{/each}}
-                            </select>
-                        </div>
+<div class="row mb-5">
+    <div class="col col-lg-6 offset-lg-3">
+        {{#each products}}
+        <div class="row border product mb-1 p-1">
+            <div class="col-12 col-lg-3">
+                <img class="w-100" src="{{imagePath}}" alt="{{product.title}}">
+            </div>
+            <div class="col-12 col-lg-9">
+                <h5><a class="text-dark" href="/product/{{product.id}}">{{product.title}}</a></h5>
+                <div class="d-flex justify-content-between">
+                    <span class="text-secondary">{{price}} грн</span>
+                    <div>
+                        <a class="text-secondary" href="/cart/remove-from-cart/{{product.id}}"><i class="fas fa-minus"></i></a><span class="border text-primary p-1 m-1">{{qty}} шт</span><a class="text-secondary" href="/cart/add-to-cart/{{product.id}}"><i class="fas fa-plus"></i></a>
                     </div>
-                    <input type="hidden" name="_csrf" value="{{ csrfToken }}">
-                    <button type="submit" class="btn btn-success block float-right">Оформить заказ</button>
-                </form>
+                </div>
+            </div>
+            <div class="col-12 col-lg-2">
+                
             </div>
         </div>
-        {{!-- <hr> --}}
-        {{!-- <div class="row">
-            <div class="col-12 col-lg-6">
-                {{#each ships}}
-                <h5>{{name}}</h5>
-                <p class="text-secondary">{{description}}</p>
-                {{/each}}
-            </div>
-            <div class="col-12 col-lg-6">
-                {{#each payments}}
-                <h5>{{name}}</h5>
-                <p class="text-secondary">{{description}}</p>
-                {{/each}}
-            </div>
-        </div> --}}
+        {{/each}}
     </div>
 </div>
+<form class="row" action="/cart" method="POST">
+        <div class="form-group col-12 col-lg-3 offset-lg-3">
+            <label for="shippingSelect">Способ доставки</label>
+            <select class="form-control" id="shippingSelect" name="shippingSelect">
+                {{#each ships}}
+                <option value="{{id}}">{{name}}</option>
+                {{/each}}
+            </select>
+        </div>
+        <div class="form-group col-12 col-lg-3">
+            <label for="paymentSelect">Способ оплаты</label>
+            <select class="form-control" id="paymentSelect" name="paymentSelect">
+                {{#each payments}}
+                <option value="{{id}}">{{name}}</option>
+                {{/each}}
+            </select>
+            
+        </div>
+        <div class="col-12 col-lg-6 offset-lg-3">
+            <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+            <button type="submit" class="btn btn-primary block float-right">Оформить заказ ({{totalPrice}} грн)</button>
+        </div>
+        </form>
 {{else}}
 <div class="row">
     <div class="col-12 col-lg-6 offset-lg-3">

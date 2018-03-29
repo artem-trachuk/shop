@@ -176,7 +176,7 @@ router.get('/:id', buildCategories, (req, res, next) => { // find all products i
             var length = res.locals.products.length;
             res.locals.products = res.locals.products.slice((res.locals.productsPerPage * (page - 1)), (res.locals.productsPerPage * page));
             require('./helpers/buildPagination')(res.locals, page, length, res.locals.productsPerPage);
-            res.locals.title = category.name + ' - ' + res.locals.shopTitle;
+            res.locals.title = page > 1 ? 'Страница ' + page + ' - ' + category.name + ' - ' + res.locals.shopTitle : category.name + ' - ' + res.locals.shopTitle;
             res.render('index');
         })
         .catch(err => {

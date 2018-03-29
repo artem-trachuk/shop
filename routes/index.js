@@ -42,22 +42,35 @@ router.get('/', (req, res, next) => {
 }, function (req, res, next) {
   // find all products which have at least one category
   var page = req.query.page ? parseInt(req.query.page) : 1;
-  Product.find().sort({
+  var search = req.query.search;
+  if (search) {
+    Product.find({
+      title: {
+        $regex: new RegExp( '.*' + search + '.*'),
+        $options: 'i'
+      }
+    })
+    .then(products => {
+      res.locals.products = products;
+      res.locals.disablePagination = true;
+      next();
+    })
+    .catch(err => next(err));
+  } else {
+    Product.find().sort({
       _id: -1
     }).skip(res.locals.productsPerPage * (page - 1)).limit(res.locals.productsPerPage)
     .then(products => {
       res.locals.products = products;
       next();
     })
-    .catch(err => {
-      req.flash('errors', 'Не удалось загрузить список продуктов.');
-      next();
-    });
+    .catch(err => next(err));
+  }
 }, buildCategories, (req, res, next) => {
   Product.count().then(count => {
     var page = req.query.page ? parseInt(req.query.page) : 1;
     req.session.callbackUrl = '/';
-    res.locals.title = res.locals.shopTitle + ' - магазин сетевого оборудования от специалистов, которые с ним работают';
+    res.locals.title = page > 1 ? 'Страница ' + page + ' - ' + res.locals.shopTitle : res.locals.shopTitle;
     require('./helpers/buildPagination')(res.locals, page, count, res.locals.productsPerPage);
     res.render('index');
   }).catch(err => next(err));
@@ -65,17 +78,19 @@ router.get('/', (req, res, next) => {
 
 /* GET Products by Search query */
 router.get('/search', (req, res, next) => {
-  query = req.query.q;
+  var query = req.query.q;
   Product.find({
       title: {
-        $regex: '.*' + query + '.*'
+        $regex: new RegExp( '.*' + query + '.*'),
+        $options: 'i'
       }
     })
     .then(products => {
       res.locals.products = products;
       res.render('index');
     })
-})
+    .catch(err => next(err));
+});
 
 /* GET Product page. */
 router.get('/product/:id', (req, res, next) => {

@@ -45,6 +45,25 @@ router.get('/', (req, res, next) => {
         next();
     }
 }, (req, res, next) => {
+    var done = 0;
+    var length = Object.keys(res.locals.products).length;
+    var checkDone = function () {
+        done++;
+        if (done === length) {
+            next();
+        };
+    }
+    // next();
+    for (product in res.locals.products) {
+        (function (prd) {
+            Product.findById(prd)
+                .then(p => {
+                    res.locals.products[prd].imagePath = p.imagePath;
+                    checkDone();
+                }).catch(err => next(err));
+        })(product);
+    }
+}, (req, res, next) => {
     res.render('cart', {
         csrfToken: req.csrfToken()
     });

@@ -1,9 +1,8 @@
 <div class="row mb-4">
-    <div class="col-12 col-lg-9 offset-lg-3 d-flex justify-content-between">
-        {{#if products}} {{> pagination}} {{/if}}
-        <form class="form-inline float-right" method="GET" action="/search">
-            <input class="form-control mr-sm-2" type="search" name="q" placeholder="Поиск" aria-label="Поиск">
-            <button class="btn btn-outline-dark my-2 my-sm-0" type="submit">Найти</button>
+    <div class="col-12 col-lg-9 offset-lg-3 d-flex justify-content-end">
+        <form class="form-inline float-right" method="GET" action="/">
+            <input class="form-control mr-sm-2" type="search" name="search" placeholder="Поиск" aria-label="Поиск">
+            <button class="btn btn-outline-primary my-2 my-sm-0" type="submit">Найти</button>
         </form>
     </div>
 </div>
