@@ -18,6 +18,10 @@
                     Описание отображается в заголовке главной страницы после названия сайта и в нижней части на всех страницах
                 </small>
             </div>
+            <div class="form-group">
+                <label for="description">Адрес</label>
+                <input type="text" name="address" id="address" value="{{address}}" class="form-control" required>
+            </div>
             <input type="hidden" name="_csrf" value="{{csrfToken}}">
             <button class="btn btn-success" type="submit">Сохранить</button>
         </form>
