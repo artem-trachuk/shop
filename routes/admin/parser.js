@@ -174,6 +174,12 @@ router.post('/', upload.single('xlsx'), (req, res, next) => {
                                             })
                                             .then(field => {
                                                 if (field) {
+                                                    if (product[2]) {
+                                                        var fieldData = [{
+                                                            field: field._id,
+                                                            fieldValue: product[2]
+                                                        }]
+                                                    }
                                                     Product.create({
                                                             article: counter.product,
                                                             title: product[4],
@@ -182,10 +188,7 @@ router.post('/', upload.single('xlsx'), (req, res, next) => {
                                                             USDprice: product[10],
                                                             categories: [category],
                                                             imagePath: imageName ? imageName : undefined,
-                                                            data: [{
-                                                                field: field._id,
-                                                                fieldValue: product[2]
-                                                            }]
+                                                            data: fieldData ? fieldData : []
                                                         }).then(createResult => {
                                                             addedProducts++;
                                                             checkProductsDone();
