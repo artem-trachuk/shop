@@ -61,7 +61,9 @@ router.get('/', (req, res, next) => {
         (function (prd) {
             Product.findById(prd)
                 .then(p => {
-                    res.locals.products[prd].imagePath = p.imagePath;
+                    if (p) {
+                        res.locals.products[prd].imagePath = p.imagePath;
+                    }
                     checkDone();
                 }).catch(err => next(err));
         })(product);
