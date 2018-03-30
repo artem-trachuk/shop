@@ -17,6 +17,7 @@ var Category = require('./../../models/category');
 var Product = require('./../../models/product');
 var Counter = require('../../models/counter');
 var Field = require('./../../models/field');
+var mongoose = require('mongoose');
 
 router.get('/', (req, res, next) => {
     Field.findOne({
@@ -166,8 +167,9 @@ router.post('/', upload.single('xlsx'), (req, res, next) => {
                                         var image = parsedImages.find(v => v.fromCell === cell);
                                         if (image) {
                                             var buffer = image.data().asNodeBuffer();
-                                            var imageName = '/uploads/' + image.name;
-                                            fs.writeFile(`${conf.dest}/${image.name}`, buffer, (err) => {});
+                                            var generatedName = mongoose.Types.ObjectId().toString() + image.name;
+                                            var imageName = '/uploads/' + generatedName;
+                                            fs.writeFile(`${conf.dest}/${generatedName}`, buffer, (err) => {});
                                         }
                                         Field.findOne({
                                                 name: 'Производитель'
