@@ -50,7 +50,7 @@ router.post('/', upload.single('xlsx'), (req, res, next) => {
         return res.redirect('/admin/parser');
     }
     if (req.file.originalname !== 'Price_Infotech_foto.xlsm') {
-        req.flash('errors', 'Неправильный файл! Загрузите файл с названием Price_Infotech_Partner.xlsx.');
+        req.flash('errors', 'Неправильный файл! Загрузите файл с названием Price_Infotech_Partner.xlsm.');
         return res.redirect('/admin/parser');
     }
     const parsedBuffer = xlsx.parse(req.file.buffer)[0].data;
